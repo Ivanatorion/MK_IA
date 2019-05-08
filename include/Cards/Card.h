@@ -2,7 +2,6 @@
 #define CARD_H
 
 #include <string>
-#include "../defines.h"
 
 enum COLOR {RED, GREEN, BLUE, WHITE, GOLD, BLACK};
 

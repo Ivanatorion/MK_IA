@@ -1,15 +1,17 @@
 #include <cstdio>
 #include <vector>
-#include "../include/defines.h"
+#include "../include/Game.h"
 #include "../include/Map.h"
 #include "../include/Cards/Card.h"
 #include "../include/Cards/ActionCards/ACRage.h"
 
 int main(int argc, char* argv[]){
-  Card *c = new ACRage();
-  Map m;
+  Game g;
 
-  printf("Name: %s", c->getName().c_str());
+  STATE s = g.getState();
+
+  printf("Cards in hand: %d/%d\n", (int) s.hand.size(), s.handMaxSize);
+  printf("\n");
 
   return 0;
 }
