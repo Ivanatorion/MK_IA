@@ -1,6 +1,17 @@
 #include "../include/Game.h"
 
-Game::Game(){
+#include <cstdio>
+
+Game::Game(Player *player){
+  this->player = player;
+  state.m = NULL;
+  state.gameRunning = false;
+}
+
+void Game::reset(){
+  if(state.m != NULL)
+    delete state.m;
+
   state.m = new Map();
 
   state.exp = 0;
@@ -14,6 +25,9 @@ Game::Game(){
   state.curTile = 0;
   state.curHex = state.m->getTile(0).hexes[3];
 
+  state.isDayNight = true;
+
+  state.gameOver = false;
 }
 
 void Game::step(ACTION action, int actionParam){
@@ -25,7 +39,28 @@ void Game::step(ACTION action, int actionParam){
   }
 }
 
+void Game::run(){
+  ACTION nextAction;
+  int nextParam;
+
+  this->reset();
+  state.avAttack = 3;
+  state.gameRunning = true;
+
+  while(!this->state.gameOver){
+      this->printState();
+      this->player->takeAction(state, &nextAction, &nextParam);
+      this->step(nextAction, nextParam);
+  }
+
+  state.gameRunning = false;
+}
+
 void Game::printState(){
+  if(!state.gameRunning){
+    printf("\nGame is not running\n");
+    return;
+  }
 
   //Cards in Hand
   printf("\nCards in hand: ");

@@ -1,15 +1,16 @@
-#ifndef ACRAGE_H
-#define ACRAGE_H
+#ifndef ACSTAMINA_H
+#define ACSTAMINA_H
 
 #include <string>
 #include "../Card.h"
 
-class ACRage : public Card{
+class ACStamina : public Card{
   public:
-    ACRage();
+    ACStamina();
     void playCardWeak(STATE *s);
     void playCardStrong(STATE *s);
     std::string getName();
+
   private:
 
 };
