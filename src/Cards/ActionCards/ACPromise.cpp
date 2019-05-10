@@ -1,8 +1,8 @@
 #include "../../../include/Cards/ActionCards/ACPromise.h"
 
 ACPromise::ACPromise(){
-	this->color = WHITE;
-	this->cardtype = ACTIONCARD;
+  this->color = WHITE;
+  this->cardtype = ACTIONCARD;
 }
 
 std::string ACPromise::getName(){
@@ -10,9 +10,12 @@ std::string ACPromise::getName(){
 }
 
 void ACPromise::playCardWeak(STATE *s){
-	s->avInfluence = s->avInfluence + 2;
+  s->avInfluence = s->avInfluence + 2;
 }
 
 void ACPromise::playCardStrong(STATE *s){
-	s->avInfluence = s->avInfluence + 4;
+  s->avInfluence = s->avInfluence + 4;
+
+  if(s->ConcentrationNextCard)
+    s->avInfluence = s->avInfluence + 2;
 }

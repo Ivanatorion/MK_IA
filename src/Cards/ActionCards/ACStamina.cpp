@@ -15,4 +15,7 @@ void ACStamina::playCardWeak(STATE *s){
 
 void ACStamina::playCardStrong(STATE *s){
   s->avMove = s->avMove + 4;
+  
+  if(s->ConcentrationNextCard)
+    s->avMove = s->avMove + 2;
 }

@@ -1,7 +1,7 @@
 #include "../../../include/Cards/ActionCards/ACSwiftness.h"
 
 ACSwiftness::ACSwiftness(){
-  this->color = BLUE;
+  this->color = WHITE;
   this->cardtype = ACTIONCARD;
 }
 
@@ -15,4 +15,7 @@ void ACSwiftness::playCardWeak(STATE *s){
 
 void ACSwiftness::playCardStrong(STATE *s){
   s->avRangedAttack = s->avRangedAttack + 3;
+  
+  if(s->ConcentrationNextCard)
+    s->avRangedAttack = s->avRangedAttack + 2;
 }

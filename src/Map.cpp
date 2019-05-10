@@ -191,9 +191,10 @@ void Map::printStack(){
 }
 
 void Map::shuffleTiles(){
+  const int swaps = 500;
   TILE auxtile;
   int t1, t2;
-  for(int swaps = SHUFFLE_SWAPS; swaps > 0; swaps--){
+  for(int i = 0; i < swaps; i++){
     t1 = rand()%(NUM_TILES-1) + 1;
     t2 = rand()%(NUM_TILES-1) + 1;
     auxtile = tiles[t1];

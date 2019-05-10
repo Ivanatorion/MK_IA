@@ -9,16 +9,18 @@
 #define N_DICE_IN_SOURCE 3
 
 enum COLOR {RED, GREEN, BLUE, WHITE, GOLD, BLACK, NONE}; //NONE for Artifacts
-enum CARDTYPE {ACTIONCARD, SPELLCARD, ARTIFACTCARD};
+enum CARDTYPE {ACTIONCARD, SPELLCARD, ARTIFACTCARD, WOUND};
 
 class Player;
 typedef struct stado{
   bool gameRunning;        //Game is running.
-  bool gameOver;
+  bool gameOver;           //Game should end.
 
   std::vector<Card*> hand; //Cards in the player hand.
   int handMaxSize;         //Maximum cards the player can hold.
+  int currentRound;        //Current game round.
   int exp;                 //The ammount of "fame" the player has.
+  int reputation;          //The level of reputation.
   int curTile;             //curTile = number of the tile (in game number)
   int curTileN;            //curTileN = number of the tile (in map position)
   int curHexN;             //Number of the Hex in the tile
@@ -43,14 +45,23 @@ typedef struct stado{
 
   bool isDayNight;         //True for day, False for night.
 
+  int avHeal;
   int avAttack, avBlock, avMove, avInfluence; //Available Attack, Block, Move and Influence.
   int avFireAttack, avFireBlock, avIceAttack, avIceBlock, avColdFireAttack, avColdFireBlock;
   int avRangedAttack, avRangedFireAttack, avRangedIceAttack, avRangedColdFireAttack;
   int avSiegeAttack, avSiegeFireAttack, avSiegeIceAttack, avSiegeColdFireAttack;
 
   Player *player;
+
+  //Card vars
+  bool ManaDrawWeakActive;
+  bool ConcentrationNextCard;
+
+  //End Turn
+  int fameToGain;
+  int repToGain;
 } STATE;
 
-enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, MOVE_TO_ADJACENT_HEX, TAKE_DIE_FROM_SOURCE};
+enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, MOVE_TO_ADJACENT_HEX, TAKE_DIE_FROM_SOURCE, END_TURN, QUIT_GAME};
 
 #endif

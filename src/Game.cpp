@@ -2,6 +2,17 @@
 
 #include "../include/Cards/ActionCards/ACCrystallize.h"
 #include "../include/Cards/ActionCards/ACInstinct.h"
+#include "../include/Cards/ActionCards/ACColdToughness.h"
+#include "../include/Cards/ActionCards/ACConcentration.h"
+#include "../include/Cards/ActionCards/ACDetermination.h"
+#include "../include/Cards/ActionCards/ACManaDraw.h"
+#include "../include/Cards/ActionCards/ACMarch.h"
+#include "../include/Cards/ActionCards/ACPromise.h"
+#include "../include/Cards/ActionCards/ACRage.h"
+#include "../include/Cards/ActionCards/ACStamina.h"
+#include "../include/Cards/ActionCards/ACSwiftness.h"
+#include "../include/Cards/ActionCards/ACThreaten.h"
+#include "../include/Cards/ActionCards/ACTranquility.h"
 
 #include <cstdio>
 
@@ -11,18 +22,40 @@ Game::Game(Player *player){
   state.gameRunning = false;
 }
 
+std::string Game::colorToString(COLOR c){
+  switch (c) {
+    case RED:
+      return "Red";
+    case BLUE:
+      return "Blue";
+    case GREEN:
+      return "Green";
+    case WHITE:
+      return "White";
+    case GOLD:
+      return "Gold";
+    case BLACK:
+      return "Black";
+    default:
+      return "None";
+  }
+}
+
 void Game::reset(){
   if(state.m != NULL)
     delete state.m;
 
   state.m = new Map();
 
+  state.currentRound = 1;
   state.exp = 0;
+  state.reputation = 0;
   state.handMaxSize = 5;
   state.avAttack = 0;
   state.avBlock = 0;
   state.avMove = 0;
   state.avInfluence = 0;
+  state.avHeal = 0;
   state.curTileN = 0;
   state.curHexN = 3;
   state.curTile = 0;
@@ -35,13 +68,19 @@ void Game::reset(){
   state.spellsDeck.clear();
 
   state.playerTokensRed = 0;
-  state.playerTokensWhite = 2;
-  state.playerTokensGreen = 2;
-  state.playerTokensBlue = 1;
+  state.playerTokensWhite = 0;
+  state.playerTokensGreen = 0;
+  state.playerTokensBlue = 0;
   state.playerCrystalsRed = 0;
   state.playerCrystalsWhite = 0;
   state.playerCrystalsGreen = 0;
   state.playerCrystalsBlue = 0;
+
+  state.ManaDrawWeakActive = false;
+  state.ConcentrationNextCard = false;
+
+  state.fameToGain = 0;
+  state.repToGain = 0;
 
   for(int i = 0; i < N_DICE_IN_SOURCE; i++)
     rollSourceDie(i); //TODO: CHECK IF VALID START
@@ -55,8 +94,24 @@ void Game::reset(){
   //TODO: INIT CARDS / DECKS
   state.playerDeedDeck.addCardTop(new ACCrystallize());
   state.playerDeedDeck.addCardTop(new ACInstinct());
-  state.hand.push_back(state.playerDeedDeck.drawCard());
-  state.hand.push_back(state.playerDeedDeck.drawCard());
+  state.playerDeedDeck.addCardTop(new ACColdToughness());
+  state.playerDeedDeck.addCardTop(new ACDetermination());
+  state.playerDeedDeck.addCardTop(new ACManaDraw());
+  state.playerDeedDeck.addCardTop(new ACConcentration());
+  state.playerDeedDeck.addCardTop(new ACMarch());
+  state.playerDeedDeck.addCardTop(new ACMarch());
+  state.playerDeedDeck.addCardTop(new ACPromise());
+  state.playerDeedDeck.addCardTop(new ACRage());
+  state.playerDeedDeck.addCardTop(new ACRage());
+  state.playerDeedDeck.addCardTop(new ACThreaten());
+  state.playerDeedDeck.addCardTop(new ACStamina());
+  state.playerDeedDeck.addCardTop(new ACSwiftness());
+  state.playerDeedDeck.addCardTop(new ACSwiftness());
+  state.playerDeedDeck.addCardTop(new ACTranquility());
+  state.playerDeedDeck.shuffle();
+
+  for(int i = 0; i < state.handMaxSize; i++)
+    state.hand.push_back(state.playerDeedDeck.drawCard());
 }
 
 void Game::rollSourceDie(int dieN){
@@ -93,6 +148,12 @@ void Game::step(ACTION action, int actionParam){
     case TAKE_DIE_FROM_SOURCE:
       stepTakeDieFromSource(actionParam);
       break;
+    case END_TURN:
+      stepEndTurn(actionParam);
+      break;
+    case QUIT_GAME:
+      state.gameOver = true;
+      break;
     default:
       return;
   }
@@ -105,8 +166,7 @@ void Game::run(){
   this->reset();
   state.gameRunning = true;
 
-  int limit = 2;
-  while(!this->state.gameOver && limit-- > 0){
+  while(!this->state.gameOver){
       this->printState();
       this->state.player->takeAction(state, &nextAction, &nextParam);
       this->step(nextAction, nextParam);
@@ -121,6 +181,7 @@ void Game::printState(){
     return;
   }
 
+  printf("\n################################################################################\n");
   //Cards in Hand
   printf("\nCards in hand: ");
   if(state.hand.size() == 0)
@@ -130,11 +191,19 @@ void Game::printState(){
       printf("%s ", state.hand[i]->getName().c_str());
   printf("\n\n");
 
+  printf("Cards in Deed Deck: %d\nCards in Discard Pile: %d\n\n", state.playerDeedDeck.getSize(), state.playerDiscardDeck.getSize());
+
+  printf("Current Round: %d\n", state.currentRound);
   //Fame
-  printf("Fame: %d\n\n", state.exp);
+  printf("Fame: %d\nReputation: %d\n\n", state.exp, state.reputation);
+
+  printf("Source: ");
+  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
+    printf("%s ", colorToString(state.sourceDice[i]).c_str());
+
 
   //Attributes
-  printf("Attack: %d\nBlock: %d\nMove: %d\nInfluence: %d\n\n", state.avAttack, state.avBlock, state.avMove, state.avInfluence);
+  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\nHeal: %d\n\n", state.avAttack, state.avBlock, state.avMove, state.avInfluence, state.avHeal);
 
   //Location on map
   printf("Current map tile: %d\n", state.curTileN);
@@ -215,6 +284,12 @@ void Game::printState(){
 
   printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", state.playerCrystalsRed, state.playerCrystalsBlue, state.playerCrystalsGreen, state.playerCrystalsWhite);
   printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", state.playerTokensRed, state.playerTokensBlue, state.playerTokensGreen, state.playerTokensWhite);
+  printf("\nSpecial:\n\n");
+
+  if(state.ManaDrawWeakActive)
+    printf("Can take extra dice (ManaDraw)\n");
+  if(state.ConcentrationNextCard)
+    printf("Next Strong Card is empowered (Concentration)\n");
 
   printf("\n################################################################################\n");
 
@@ -227,6 +302,10 @@ void Game::stepUseCardWeak(int actionParam){
   if(actionParam < state.hand.size())
     aux = state.hand[actionParam];
   else
+    return;
+
+  //Cant play Wounds
+  if(aux->getCardType() == WOUND)
     return;
 
   //Checks if the player have mana
@@ -289,48 +368,57 @@ void Game::stepUseCardStrong(int actionParam){
   else
     return;
 
+  //Cant play Wounds
+  if(aux->getCardType() == WOUND)
+    return;
+
   //Checks if the player have mana
   if(aux->getCardType() == ARTIFACTCARD)
     hasMana = true;
   else{
     if(aux->getCardType() == ACTIONCARD){
-      switch(aux->getColor()){
-        case RED:
-          hasMana = (state.playerCrystalsRed > 0 || state.playerTokensRed > 0);
-          if(!hasMana)
-            return;
-          if(state.playerTokensRed > 0)
-            state.playerTokensRed--;
-          else
-            state.playerCrystalsRed--;
-          break;
-        case BLUE:
-          hasMana = (state.playerCrystalsBlue > 0 || state.playerTokensBlue > 0);
-          if(!hasMana)
-            return;
-          if(state.playerTokensBlue > 0)
-            state.playerTokensBlue--;
-          else
-            state.playerCrystalsBlue--;
-          break;
-        case GREEN:
-          hasMana = (state.playerCrystalsGreen > 0 || state.playerTokensGreen > 0);
-          if(!hasMana)
-            return;
-          if(state.playerTokensGreen > 0)
-            state.playerTokensGreen--;
-          else
-            state.playerCrystalsGreen--;
-          break;
-        case WHITE:
-          hasMana = (state.playerCrystalsWhite > 0 || state.playerTokensWhite > 0);
-          if(!hasMana)
-            return;
-          if(state.playerTokensWhite > 0)
-            state.playerTokensWhite--;
-          else
-            state.playerCrystalsWhite--;
-          break;
+      if(state.ConcentrationNextCard){
+        hasMana = true;
+      }
+      else{
+        switch(aux->getColor()){
+          case RED:
+            hasMana = (state.playerCrystalsRed > 0 || state.playerTokensRed > 0);
+            if(!hasMana)
+              return;
+            if(state.playerTokensRed > 0)
+              state.playerTokensRed--;
+            else
+              state.playerCrystalsRed--;
+            break;
+          case BLUE:
+            hasMana = (state.playerCrystalsBlue > 0 || state.playerTokensBlue > 0);
+            if(!hasMana)
+              return;
+            if(state.playerTokensBlue > 0)
+              state.playerTokensBlue--;
+            else
+              state.playerCrystalsBlue--;
+            break;
+          case GREEN:
+            hasMana = (state.playerCrystalsGreen > 0 || state.playerTokensGreen > 0);
+            if(!hasMana)
+              return;
+            if(state.playerTokensGreen > 0)
+              state.playerTokensGreen--;
+            else
+              state.playerCrystalsGreen--;
+            break;
+          case WHITE:
+            hasMana = (state.playerCrystalsWhite > 0 || state.playerTokensWhite > 0);
+            if(!hasMana)
+              return;
+            if(state.playerTokensWhite > 0)
+              state.playerTokensWhite--;
+            else
+              state.playerCrystalsWhite--;
+            break;
+        }
       }
     }
     else{
@@ -383,11 +471,18 @@ void Game::stepUseCardStrong(int actionParam){
 
   state.playerDiscardDeck.addCardTop(aux);
   state.hand.erase(state.hand.begin() + actionParam);
-  aux->playCardStrong(&state);
+
+  if(state.ConcentrationNextCard){
+    aux->playCardStrong(&state);
+    state.ConcentrationNextCard = false;
+  }
+  else{
+    aux->playCardStrong(&state);
+  }
 }
 
 void Game::stepTakeDieFromSource(int actionParam){
-  if(actionParam < N_DICE_IN_SOURCE)
+  if(actionParam >= N_DICE_IN_SOURCE || (state.diceTaken && !state.ManaDrawWeakActive))
     return;
 
   switch (state.sourceDice[actionParam]) {
@@ -404,11 +499,82 @@ void Game::stepTakeDieFromSource(int actionParam){
       state.playerTokensWhite++;
       break;
     case GOLD:
-      //TODO: PLAYER MUST CHOOSE
+      if(state.isDayNight){
+        switch (state.player->chooseBasicManaColor()) {
+          case RED:
+            state.playerTokensRed++;
+            break;
+          case BLUE:
+            state.playerTokensBlue++;
+            break;
+          case GREEN:
+            state.playerTokensGreen++;
+            break;
+          case WHITE:
+            state.playerTokensWhite++;
+            break;
+        }
+      }
+      else return;
       break;
     case BLACK:
+      if(!state.isDayNight){
+        state.playerTokensBlack++;
+      }
+      break;
+    case NONE:
       return;
+      break;
   }
 
-  rollSourceDie(actionParam);
+  if(!state.diceTaken)
+    state.diceTaken = true;
+  else
+    state.ManaDrawWeakActive = false;
+  state.sourceDice[actionParam] = NONE;
+}
+
+void Game::stepEndTurn(int actionParam){
+  state.diceTaken = false;
+  while(state.hand.size() < state.handMaxSize && !state.playerDeedDeck.isEmpty())
+    state.hand.push_back(state.playerDeedDeck.drawCard());
+
+  state.playerTokensRed = 0;
+  state.playerTokensBlue = 0;
+  state.playerTokensGreen = 0;
+  state.playerTokensWhite = 0;
+  state.playerTokensBlack = 0;
+
+  state.avAttack = 0;
+  state.avMove = 0;
+  state.avBlock = 0;
+  state.avInfluence = 0;
+  state.avRangedAttack = 0;
+  state.avRangedIceAttack = 0;
+  state.avRangedFireAttack = 0;
+  state.avRangedColdFireAttack = 0;
+  state.avSiegeAttack = 0;
+  state.avSiegeIceAttack = 0;
+  state.avSiegeFireAttack = 0;
+  state.avSiegeColdFireAttack = 0;
+  state.avColdFireAttack = 0;
+  state.avColdFireBlock = 0;
+  state.avFireAttack = 0;
+  state.avFireBlock = 0;
+  state.avIceAttack = 0;
+  state.avIceBlock = 0;
+  state.avHeal = 0;
+
+  state.exp = state.exp + state.fameToGain;
+  state.reputation = state.reputation + state.repToGain;
+
+  state.fameToGain = 0;
+  state.repToGain = 0;
+
+  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
+    if(state.sourceDice[i] == NONE)
+      rollSourceDie(i);
+
+  state.ManaDrawWeakActive = false;
+  state.ConcentrationNextCard = false;
 }

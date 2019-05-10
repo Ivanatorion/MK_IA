@@ -3,7 +3,7 @@
 #include "../../../include/Player/Player.h"
 
 ACColdToughness::ACColdToughness(){
-	this->color = RED;
+	this->color = BLUE;
 	this->cardtype = ACTIONCARD;
 }
 

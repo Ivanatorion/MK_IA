@@ -46,15 +46,23 @@ void ACInstinct::playCardStrong(STATE *s){
 	switch (choice) {
 		case 0:
 			s->avMove = s->avMove + 4;
+			if(s->ConcentrationNextCard)
+		    s->avMove = s->avMove + 2;
 			break;
 		case 1:
 			s->avInfluence = s->avInfluence + 4;
+			if(s->ConcentrationNextCard)
+		    s->avInfluence = s->avInfluence + 2;
 			break;
 		case 2:
 			s->avAttack = s->avAttack + 4;
+			if(s->ConcentrationNextCard)
+		    s->avAttack = s->avAttack + 2;
 			break;
 		case 3:
 			s->avBlock = s->avBlock + 4;
+			if(s->ConcentrationNextCard)
+		    s->avBlock = s->avBlock + 2;
 			break;
 	}
 }

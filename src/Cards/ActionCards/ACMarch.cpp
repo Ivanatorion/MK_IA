@@ -15,4 +15,7 @@ void ACMarch::playCardWeak(STATE *s){
 
 void ACMarch::playCardStrong(STATE *s){
 	s->avMove = s->avMove + 4;
+	
+	if(s->ConcentrationNextCard)
+    s->avMove = s->avMove + 2;
 }

@@ -21,6 +21,8 @@ class Game{
     //Prints information about the current state.
     void printState();
 
+    std::string colorToString(COLOR c);
+
   private:
     STATE state;
 
@@ -29,6 +31,7 @@ class Game{
     void stepUseCardWeak(int actionParam);
     void stepUseCardStrong(int actionParam);
     void stepTakeDieFromSource(int actionParam);
+    void stepEndTurn(int actionParam);
 
     void rollSourceDie(int dieN);
 };
