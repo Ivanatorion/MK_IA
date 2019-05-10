@@ -12,6 +12,7 @@ class Deck{
     bool isEmpty();                 //Test if the Deck is empty.
     void addCardTop(Card* card);    //Add a Card on top of the Deck
     void shuffle();                 //Shuffles the Deck
+    void clear();                   //Clears the Deck
     int getSize();                  //Returns the ammount of cards in the Deck
 
   private:

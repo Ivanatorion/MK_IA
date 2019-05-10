@@ -2,6 +2,7 @@
 
 ACRage::ACRage(){
   this->color = RED;
+  this->cardtype = ACTIONCARD;
 }
 
 std::string ACRage::getName(){

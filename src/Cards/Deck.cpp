@@ -42,6 +42,10 @@ void Deck::shuffle(){
   }
 }
 
+void Deck::clear(){
+  deck.clear();
+}
+
 int Deck::getSize(){
   return deck.size();
 }

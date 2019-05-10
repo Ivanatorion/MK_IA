@@ -23,9 +23,14 @@ class Game{
 
   private:
     STATE state;
-    Player *player;
 
     void reset();
+
+    void stepUseCardWeak(int actionParam);
+    void stepUseCardStrong(int actionParam);
+    void stepTakeDieFromSource(int actionParam);
+
+    void rollSourceDie(int dieN);
 };
 
 #endif
