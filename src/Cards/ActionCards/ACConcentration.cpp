@@ -3,8 +3,10 @@
 #include "../../../include/Player/Player.h"
 
 ACConcentration::ACConcentration(){
-	this->color = GREEN;
-	this->cardtype = ACTIONCARD;
+  this->color = GREEN;
+  this->cardtype = ACTIONCARD;
+  this->choicesWeak = 1;
+	this->choicesStrong = 0;
 }
 
 std::string ACConcentration::getName(){

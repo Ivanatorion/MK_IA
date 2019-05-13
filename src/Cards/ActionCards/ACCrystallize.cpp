@@ -5,6 +5,8 @@
 ACCrystallize::ACCrystallize(){
 	this->color = BLUE;
 	this->cardtype = ACTIONCARD;
+	this->choicesWeak = 1;
+	this->choicesStrong = 1;
 }
 
 std::string ACCrystallize::getName(){
@@ -12,28 +14,34 @@ std::string ACCrystallize::getName(){
 }
 
 void ACCrystallize::playCardWeak(STATE *s){
-	COLOR manaColor = s->player->chooseBasicManaColor();
+	std::vector<std::string> choices;
+	choices.push_back("Red");
+	choices.push_back("Blue");
+	choices.push_back("Grenn");
+	choices.push_back("White");
+
+	int manaColor = s->player->chooseOption(choices);
 
 	switch (manaColor) {
-		case RED:
+		case 0:
 			if(s->playerTokensRed > 0 && s->playerCrystalsRed < 3){
 				s->playerTokensRed--;
 				s->playerCrystalsRed++;
 			}
 			break;
-		case BLUE:
+		case 1:
 			if(s->playerTokensBlue > 0 && s->playerCrystalsBlue < 3){
 				s->playerTokensBlue--;
 				s->playerCrystalsBlue++;
 			}
 			break;
-		case GREEN:
+		case 2:
 			if(s->playerTokensGreen > 0 && s->playerCrystalsGreen < 3){
 				s->playerTokensGreen--;
 				s->playerCrystalsGreen++;
 			}
 			break;
-		case WHITE:
+		case 3:
 			if(s->playerTokensWhite > 0 && s->playerCrystalsWhite < 3){
 				s->playerTokensWhite--;
 				s->playerCrystalsWhite++;
@@ -44,22 +52,28 @@ void ACCrystallize::playCardWeak(STATE *s){
 }
 
 void ACCrystallize::playCardStrong(STATE *s){
-	COLOR manaColor = s->player->chooseBasicManaColor();
+	std::vector<std::string> choices;
+	choices.push_back("Red");
+	choices.push_back("Blue");
+	choices.push_back("Grenn");
+	choices.push_back("White");
+
+	int manaColor = s->player->chooseOption(choices);
 
 	switch (manaColor) {
-		case RED:
+		case 0:
 			if(s->playerCrystalsRed < 3)
 				s->playerCrystalsRed++;
 			break;
-		case BLUE:
+		case 1:
 		if(s->playerCrystalsBlue < 3)
 			s->playerCrystalsBlue++;
 			break;
-		case GREEN:
+		case 2:
 		if(s->playerCrystalsGreen < 3)
 			s->playerCrystalsGreen++;
 			break;
-		case WHITE:
+		case 3:
 		if(s->playerCrystalsWhite < 3)
 			s->playerCrystalsWhite++;
 			break;

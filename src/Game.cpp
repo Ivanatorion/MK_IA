@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <cstdlib>
+
 #include "../include/Game.h"
 
 #include "../include/Cards/ActionCards/ACCrystallize.h"
@@ -13,8 +16,6 @@
 #include "../include/Cards/ActionCards/ACSwiftness.h"
 #include "../include/Cards/ActionCards/ACThreaten.h"
 #include "../include/Cards/ActionCards/ACTranquility.h"
-
-#include <cstdio>
 
 Game::Game(Player *player){
   this->state.player = player;
@@ -60,6 +61,11 @@ void Game::reset(){
   state.curHexN = 3;
   state.curTile = 0;
   state.curHex = state.m->getTile(0).hexes[3];
+
+  state.RegularUnitsDeck.clear();
+  state.EliteUnitsDeck.clear();
+  state.PlayerUnits.clear();
+  state.UnitOffer.clear();
 
   state.playerDiscardDeck.clear();
   state.playerDeedDeck.clear();

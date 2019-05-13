@@ -12,9 +12,15 @@ enum COLOR {RED, GREEN, BLUE, WHITE, GOLD, BLACK, NONE}; //NONE for Artifacts
 enum CARDTYPE {ACTIONCARD, SPELLCARD, ARTIFACTCARD, WOUND};
 
 class Player;
+class Unit;
 typedef struct stado{
   bool gameRunning;        //Game is running.
   bool gameOver;           //Game should end.
+
+  std::vector<Unit*> PlayerUnits;
+  std::vector<Unit*> UnitOffer;
+  std::vector<Unit*> RegularUnitsDeck;
+  std::vector<Unit*> EliteUnitsDeck;
 
   std::vector<Card*> hand; //Cards in the player hand.
   int handMaxSize;         //Maximum cards the player can hold.
@@ -62,6 +68,6 @@ typedef struct stado{
   int repToGain;
 } STATE;
 
-enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, MOVE_TO_ADJACENT_HEX, TAKE_DIE_FROM_SOURCE, END_TURN, QUIT_GAME};
+enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, MOVE_TO_ADJACENT_HEX, TAKE_DIE_FROM_SOURCE, RECRUIT_UNIT, END_TURN, QUIT_GAME};
 
 #endif
