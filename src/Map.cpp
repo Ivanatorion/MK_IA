@@ -13,11 +13,14 @@ Map::Map(){
       exit(0);
   }
 
+  outsideOfMap.terrain = NONET;
+  outsideOfMap.location = NONEL;
 
   //Initialize Hexes infromation.
   for(int i = 0; i < NUM_TILES; i++){
     for(int j = 0; j < 7; j++){
       tiles[i].hexes[j] = new HEX;
+      tiles[i].hexes[j]->rampagingEnemy.enemyType = NONEE;
 
       //Gets the terrain type of current hex.
       switch(fgetc(fp)){
@@ -159,6 +162,8 @@ Map::Map(){
   }
   tilesRevealed[0] = true;
 
+  tiles[0].hexes[0]->neighboors[2] = &outsideOfMap;
+
   this->initTileStack();
 }
 
@@ -169,6 +174,38 @@ void Map::revealTile(int tilePos){
   tiles[tilePos] = tileStack[0];
   tileStack.erase(tileStack.begin());
   tilesRevealed[tilePos] = true;
+}
+
+int Map::getMoveCost(HEX h, bool isDay){
+  int result;
+
+  switch (h.terrain) {
+    case NONET:
+    case LAKE:
+    case MOUNTAIN:
+      result = 99;
+      break;
+    case PLAIN:
+      result = 2;
+      break;
+    case HILL:
+      result = 3;
+      break;
+    case FOREST:
+      result = (isDay) ? 3 : 5;
+      break;
+    case DESERT:
+      result = (isDay) ? 5 : 3;
+      break;
+    case WASTELAND:
+      result = 4;
+      break;
+    case SWAMP:
+      result = 5;
+      break;
+  }
+
+  return result;
 }
 
 TILE Map::getTile(int p){

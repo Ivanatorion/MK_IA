@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "Enemy.h"
+
 #define NUM_TILES 15
 #define NUM_COUNTRYSIDE_TILES 7
 
@@ -14,6 +16,7 @@ typedef struct hex{
   bool hasWall[6];  //Up, Uright, Dright, Down, Dleft, Uleft
   TERRAIN terrain;
   LOCATION location;
+  ENEMY rampagingEnemy;
 } HEX;
 
 typedef struct til{
@@ -28,6 +31,7 @@ class Map{
     void revealTile(int tilePos);        //Reveals a tile at a position.
     TILE getTile(int p);                 //Returns the tile that is in the giver position "p" on the map. (Tile with tileN -1 if not revealed).
     void printStack();                   //Prints the current tile stack.
+    int getMoveCost(HEX h, bool isDay);  //Returns the move cost to enter Hex
 
   private:
     std::vector<TILE> tileStack;
@@ -35,6 +39,7 @@ class Map{
     bool tilesRevealed[NUM_TILES];
     void shuffleTiles();                 //Shuffles the tiles (tiles).
     void initTileStack();                //Initializes the stack of tiles (tileStack).
+    HEX outsideOfMap;                    //Dummy Hex to indicate out of map neighboor.
 };
 
 #endif

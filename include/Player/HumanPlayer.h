@@ -7,7 +7,6 @@ class HumanPlayer : public Player{
   public:
     HumanPlayer();
     void takeAction(STATE state, ACTION *rAction, int *rParam);
-    COLOR chooseBasicManaColor();
     int chooseOption(std::vector<std::string> choices);
 };
 

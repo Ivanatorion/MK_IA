@@ -32,6 +32,7 @@ class Game{
     void stepUseCardStrong(int actionParam);
     void stepTakeDieFromSource(int actionParam);
     void stepEndTurn(int actionParam);
+    void stepMoveToHex(int actionParam);
 
     void rollSourceDie(int dieN);
 };

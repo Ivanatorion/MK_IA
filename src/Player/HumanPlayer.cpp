@@ -14,8 +14,9 @@ void HumanPlayer::takeAction(STATE state, ACTION *rAction, int *rParam){
   printf("01) Use Card Weak\n");
   printf("02) Use Card Strong\n");
   printf("03) Take Die From Source\n");
-  printf("04) End Turn\n");
-  printf("05) Quit Game\n");
+  printf("04) Move to Adjacent Hex\n");
+  printf("05) End Turn\n");
+  printf("06) Quit Game\n");
 
   scanf("%d", &act);
 
@@ -33,9 +34,12 @@ void HumanPlayer::takeAction(STATE state, ACTION *rAction, int *rParam){
       (*rAction) = TAKE_DIE_FROM_SOURCE;
       break;
     case 4:
-      (*rAction) = END_TURN;
+      (*rAction) = MOVE_TO_ADJACENT_HEX;
       break;
     case 5:
+      (*rAction) = END_TURN;
+      break;
+    case 6:
       (*rAction) = QUIT_GAME;
       break;
   }
@@ -43,29 +47,6 @@ void HumanPlayer::takeAction(STATE state, ACTION *rAction, int *rParam){
   printf("\nType the parameter: ");
   scanf("%d", rParam);
   printf("\n");
-}
-
-COLOR HumanPlayer::chooseBasicManaColor(){
-  int c;
-  printf("Choose Mana Color:\n\n");
-  printf("00) Red\n01) Blue\n02) Green\n03) White\n");
-
-  do{
-    scanf("%d", &c);
-  }while(c < 0 || c > 3);
-
-  switch (c) {
-    case 0:
-      return RED;
-    case 1:
-      return BLUE;
-    case 2:
-      return GREEN;
-    case 3:
-      return WHITE;
-  }
-
-  return NONE; //Should not happen
 }
 
 int HumanPlayer::chooseOption(std::vector<std::string> choices){

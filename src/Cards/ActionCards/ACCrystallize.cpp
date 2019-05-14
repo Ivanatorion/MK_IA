@@ -17,7 +17,7 @@ void ACCrystallize::playCardWeak(STATE *s){
 	std::vector<std::string> choices;
 	choices.push_back("Red");
 	choices.push_back("Blue");
-	choices.push_back("Grenn");
+	choices.push_back("Green");
 	choices.push_back("White");
 
 	int manaColor = s->player->chooseOption(choices);
@@ -55,7 +55,7 @@ void ACCrystallize::playCardStrong(STATE *s){
 	std::vector<std::string> choices;
 	choices.push_back("Red");
 	choices.push_back("Blue");
-	choices.push_back("Grenn");
+	choices.push_back("Green");
 	choices.push_back("White");
 
 	int manaColor = s->player->chooseOption(choices);

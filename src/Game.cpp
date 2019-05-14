@@ -154,6 +154,9 @@ void Game::step(ACTION action, int actionParam){
     case TAKE_DIE_FROM_SOURCE:
       stepTakeDieFromSource(actionParam);
       break;
+    case MOVE_TO_ADJACENT_HEX:
+      stepMoveToHex(actionParam);
+      break;
     case END_TURN:
       stepEndTurn(actionParam);
       break;
@@ -487,9 +490,31 @@ void Game::stepUseCardStrong(int actionParam){
   }
 }
 
+void Game::stepMoveToHex(int actionParam){
+  if(actionParam < 0 || actionParam > 6)
+    return;
+
+  HEX *next = state.curHex->neighboors[actionParam];
+  int moveCost;
+
+  if(next != NULL && next->terrain != NONET){
+    moveCost = state.m->getMoveCost(*next, state.isDayNight);
+    if(state.avMove > moveCost){
+      state.avMove = state.avMove - moveCost;
+      state.curHex = next;
+    }
+  }
+}
+
 void Game::stepTakeDieFromSource(int actionParam){
   if(actionParam >= N_DICE_IN_SOURCE || (state.diceTaken && !state.ManaDrawWeakActive))
     return;
+
+  std::vector<std::string> choices;
+	choices.push_back("Red");
+	choices.push_back("Blue");
+	choices.push_back("Green");
+	choices.push_back("White");
 
   switch (state.sourceDice[actionParam]) {
     case RED:
@@ -506,17 +531,17 @@ void Game::stepTakeDieFromSource(int actionParam){
       break;
     case GOLD:
       if(state.isDayNight){
-        switch (state.player->chooseBasicManaColor()) {
-          case RED:
+        switch (state.player->chooseOption(choices)) {
+          case 0:
             state.playerTokensRed++;
             break;
-          case BLUE:
+          case 1:
             state.playerTokensBlue++;
             break;
-          case GREEN:
+          case 2:
             state.playerTokensGreen++;
             break;
-          case WHITE:
+          case 3:
             state.playerTokensWhite++;
             break;
         }
