@@ -3,6 +3,8 @@
 
 #include "../include/Game.h"
 
+#include "../include/Units/UPeasants.h"
+
 #include "../include/Cards/ActionCards/ACCrystallize.h"
 #include "../include/Cards/ActionCards/ACInstinct.h"
 #include "../include/Cards/ActionCards/ACColdToughness.h"
@@ -53,6 +55,7 @@ void Game::reset(){
   state.reputation = 0;
   state.handMaxSize = 5;
   state.avAttack = 0;
+#include "../include/Units/Unit.h"
   state.avBlock = 0;
   state.avMove = 0;
   state.avInfluence = 0;
@@ -116,6 +119,8 @@ void Game::reset(){
   state.playerDeedDeck.addCardTop(new ACTranquility());
   state.playerDeedDeck.shuffle();
 
+  state.UnitOffer.push_back(new UPeasants());
+
   for(int i = 0; i < state.handMaxSize; i++)
     state.hand.push_back(state.playerDeedDeck.drawCard());
 }
@@ -156,6 +161,9 @@ void Game::step(ACTION action, int actionParam){
       break;
     case MOVE_TO_ADJACENT_HEX:
       stepMoveToHex(actionParam);
+      break;
+    case RECRUIT_UNIT:
+      stepRecruitUnit(actionParam);
       break;
     case END_TURN:
       stepEndTurn(actionParam);
@@ -202,9 +210,13 @@ void Game::printState(){
 
   printf("Cards in Deed Deck: %d\nCards in Discard Pile: %d\n\n", state.playerDeedDeck.getSize(), state.playerDiscardDeck.getSize());
 
-  printf("Current Round: %d\n", state.currentRound);
+  printf("Current Round: %d", state.currentRound);
+  printf("                      Units in offer:");
+  for(int i = 0; i < state.UnitOffer.size(); i++)
+    printf(" %s", state.UnitOffer[i]->getName().c_str());
+
   //Fame
-  printf("Fame: %d\nReputation: %d\n\n", state.exp, state.reputation);
+  printf("\nFame: %d\nReputation: %d\n\n", state.exp, state.reputation);
 
   printf("Source: ");
   for(int i = 0; i < N_DICE_IN_SOURCE; i++)
@@ -563,6 +575,13 @@ void Game::stepTakeDieFromSource(int actionParam){
   else
     state.ManaDrawWeakActive = false;
   state.sourceDice[actionParam] = NONE;
+}
+
+void Game::stepRecruitUnit(int actionParam){
+  if(actionParam < 0 || actionParam >= state.UnitOffer.size())
+    return;
+
+  state.UnitOffer[actionParam]->tryToRecruit(&state);
 }
 
 void Game::stepEndTurn(int actionParam){

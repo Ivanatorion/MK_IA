@@ -10,13 +10,13 @@ void HumanPlayer::takeAction(STATE state, ACTION *rAction, int *rParam){
   int act;
 
   printf("Choose Action: \n\n");
-  printf("00) Nothing\n");
+  printf("00) Nothing                  07) Quit Game\n");
   printf("01) Use Card Weak\n");
   printf("02) Use Card Strong\n");
   printf("03) Take Die From Source\n");
   printf("04) Move to Adjacent Hex\n");
   printf("05) End Turn\n");
-  printf("06) Quit Game\n");
+  printf("06) Recruit Unit\n");
 
   scanf("%d", &act);
 
@@ -40,6 +40,9 @@ void HumanPlayer::takeAction(STATE state, ACTION *rAction, int *rParam){
       (*rAction) = END_TURN;
       break;
     case 6:
+      (*rAction) = RECRUIT_UNIT;
+      break;
+    case 7:
       (*rAction) = QUIT_GAME;
       break;
   }

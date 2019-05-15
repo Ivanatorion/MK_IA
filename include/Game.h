@@ -33,6 +33,7 @@ class Game{
     void stepTakeDieFromSource(int actionParam);
     void stepEndTurn(int actionParam);
     void stepMoveToHex(int actionParam);
+    void stepRecruitUnit(int actionParam);
 
     void rollSourceDie(int dieN);
 };

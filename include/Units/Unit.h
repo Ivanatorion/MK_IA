@@ -2,6 +2,9 @@
 #define UNIT_H
 
 #include <string>
+#include <vector>
+
+#include "../Map.h"
 #include "../defines.h"
 
 class Unit{
@@ -14,14 +17,19 @@ class Unit{
     bool hasFireResistance(){return fRes;}
     bool hasIceResistance(){return iRes;}
     bool isWounded(){return wounded;}
+    bool isElite(){return level > 2;}
     int getChoices(){return playChoices;}
+    int getLevel(){return level;}
+    virtual void tryToRecruit(STATE *s);     //Tries to recruit Unit
 
   protected:
+    std::vector<LOCATION> recruitableLocations; //Locations in which this Unit can be recruited
     int influenceCost;           //Cost to recruit
     int armor;                   //Armor value
     int playChoices;             //How many choices the Player has to make when using this unit.
     bool pRes, fRes, iRes;       //Resistances
     bool wounded;                //If Unit is wounded
+    int level;                   //Unit Level
 };
 
 #endif
