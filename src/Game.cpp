@@ -3,7 +3,36 @@
 
 #include "../include/Game.h"
 
+#include "../include/Units/UAltemGuardians.h"
+#include "../include/Units/UAltemMages.h"
+#include "../include/Units/UAmotepFreezers.h"
+#include "../include/Units/UAmotepGunners.h"
+#include "../include/Units/UCatapults.h"
+#include "../include/Units/UDelphanaMasters.h"
+#include "../include/Units/UFireGolems.h"
+#include "../include/Units/UFireMages.h"
+#include "../include/Units/UForesters.h"
+#include "../include/Units/UGuardianGolems.h"
+#include "../include/Units/UHerbalists.h"
+#include "../include/Units/UHeroesBlue.h"
+#include "../include/Units/UHeroesGreen.h"
+#include "../include/Units/UHeroesRed.h"
+#include "../include/Units/UHeroesWhite.h"
+#include "../include/Units/UIceGolems.h"
+#include "../include/Units/UIceMages.h"
+#include "../include/Units/UIllusionists.h"
+#include "../include/Units/UMagicFamiliars.h"
+#include "../include/Units/UNorthernMonks.h"
 #include "../include/Units/UPeasants.h"
+#include "../include/Units/URedCapeMonks.h"
+#include "../include/Units/USavageMonks.h"
+#include "../include/Units/UScouts.h"
+#include "../include/Units/UShockTroops.h"
+#include "../include/Units/USorcerers.h"
+#include "../include/Units/UThugs.h"
+#include "../include/Units/UUtemCrossbowmen.h"
+#include "../include/Units/UUtemGuardsmen.h"
+#include "../include/Units/UUtemSwordsmen.h"
 
 #include "../include/Cards/ActionCards/ACCrystallize.h"
 #include "../include/Cards/ActionCards/ACInstinct.h"
@@ -44,18 +73,20 @@ std::string Game::colorToString(COLOR c){
   }
 }
 
+//Resets the Game
 void Game::reset(){
   if(state.m != NULL)
     delete state.m;
 
   state.m = new Map();
+  state.m->revealTile(1);
+  state.m->revealTile(2);
 
   state.currentRound = 1;
   state.exp = 0;
   state.reputation = 0;
   state.handMaxSize = 5;
   state.avAttack = 0;
-#include "../include/Units/Unit.h"
   state.avBlock = 0;
   state.avMove = 0;
   state.avInfluence = 0;
@@ -91,16 +122,20 @@ void Game::reset(){
   state.fameToGain = 0;
   state.repToGain = 0;
 
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    rollSourceDie(i); //TODO: CHECK IF VALID START
+  int specialColorCount;
+  do{
+    specialColorCount = 0;
+    for(int i = 0; i < N_DICE_IN_SOURCE; i++){
+      this->rollSourceDie(i);
+      if(state.sourceDice[i] == BLACK || state.sourceDice[i] == GOLD)
+        specialColorCount++;
+    }
+  } while(specialColorCount > N_DICE_IN_SOURCE - specialColorCount);
 
   state.diceTaken = false;
-
   state.isDayNight = true;
-
   state.gameOver = false;
 
-  //TODO: INIT CARDS / DECKS
   state.playerDeedDeck.addCardTop(new ACCrystallize());
   state.playerDeedDeck.addCardTop(new ACInstinct());
   state.playerDeedDeck.addCardTop(new ACColdToughness());
@@ -119,10 +154,93 @@ void Game::reset(){
   state.playerDeedDeck.addCardTop(new ACTranquility());
   state.playerDeedDeck.shuffle();
 
-  state.UnitOffer.push_back(new UPeasants());
+  state.RegularUnitsDeck.push_back(new UForesters());
+  state.RegularUnitsDeck.push_back(new UForesters());
+  state.RegularUnitsDeck.push_back(new UGuardianGolems());
+  state.RegularUnitsDeck.push_back(new UGuardianGolems());
+  state.RegularUnitsDeck.push_back(new UUtemGuardsmen());
+  state.RegularUnitsDeck.push_back(new UUtemGuardsmen());
+  state.RegularUnitsDeck.push_back(new UUtemCrossbowmen());
+  state.RegularUnitsDeck.push_back(new UUtemCrossbowmen());
+  state.RegularUnitsDeck.push_back(new UUtemSwordsmen());
+  state.RegularUnitsDeck.push_back(new UUtemSwordsmen());
+  state.RegularUnitsDeck.push_back(new UScouts());
+  state.RegularUnitsDeck.push_back(new UScouts());
+  state.RegularUnitsDeck.push_back(new UShockTroops());
+  state.RegularUnitsDeck.push_back(new UShockTroops());
+  state.RegularUnitsDeck.push_back(new UIllusionists());
+  state.RegularUnitsDeck.push_back(new UIllusionists());
+  state.RegularUnitsDeck.push_back(new UHerbalists());
+  state.RegularUnitsDeck.push_back(new UHerbalists());
+  state.RegularUnitsDeck.push_back(new URedCapeMonks());
+  state.RegularUnitsDeck.push_back(new UNorthernMonks());
+  state.RegularUnitsDeck.push_back(new USavageMonks());
+  state.RegularUnitsDeck.push_back(new UMagicFamiliars());
+  state.RegularUnitsDeck.push_back(new UMagicFamiliars());
+  state.RegularUnitsDeck.push_back(new UThugs());
+  state.RegularUnitsDeck.push_back(new UThugs());
+  state.RegularUnitsDeck.push_back(new UPeasants());
+  state.RegularUnitsDeck.push_back(new UPeasants());
+  state.RegularUnitsDeck.push_back(new UPeasants());
+
+  state.EliteUnitsDeck.push_back(new UAltemGuardians());
+  state.EliteUnitsDeck.push_back(new UAltemGuardians());
+  state.EliteUnitsDeck.push_back(new UAltemGuardians());
+  state.EliteUnitsDeck.push_back(new UAltemMages());
+  state.EliteUnitsDeck.push_back(new UAltemMages());
+  state.EliteUnitsDeck.push_back(new UAmotepGunners());
+  state.EliteUnitsDeck.push_back(new UAmotepGunners());
+  state.EliteUnitsDeck.push_back(new UAmotepFreezers());
+  state.EliteUnitsDeck.push_back(new UAmotepFreezers());
+  state.EliteUnitsDeck.push_back(new UCatapults());
+  state.EliteUnitsDeck.push_back(new UCatapults());
+  state.EliteUnitsDeck.push_back(new UCatapults());
+  state.EliteUnitsDeck.push_back(new UDelphanaMasters());
+  state.EliteUnitsDeck.push_back(new UDelphanaMasters());
+  state.EliteUnitsDeck.push_back(new UIceMages());
+  state.EliteUnitsDeck.push_back(new UIceMages());
+  state.EliteUnitsDeck.push_back(new UIceGolems());
+  state.EliteUnitsDeck.push_back(new UIceGolems());
+  state.EliteUnitsDeck.push_back(new UFireMages());
+  state.EliteUnitsDeck.push_back(new UFireMages());
+  state.EliteUnitsDeck.push_back(new UFireGolems());
+  state.EliteUnitsDeck.push_back(new UFireGolems());
+  state.EliteUnitsDeck.push_back(new USorcerers());
+  state.EliteUnitsDeck.push_back(new USorcerers());
+  state.EliteUnitsDeck.push_back(new UHeroesBlue());
+  state.EliteUnitsDeck.push_back(new UHeroesGreen());
+  state.EliteUnitsDeck.push_back(new UHeroesRed());
+  state.EliteUnitsDeck.push_back(new UHeroesWhite());
+  this->shuffleUnits();
+
+  for(int i = 0; i < N_UNITS_IN_OFFER; i++){
+    state.UnitOffer.push_back(state.RegularUnitsDeck[state.RegularUnitsDeck.size()-1]);
+    state.RegularUnitsDeck.erase(state.RegularUnitsDeck.end() - 1);
+  }
 
   for(int i = 0; i < state.handMaxSize; i++)
     state.hand.push_back(state.playerDeedDeck.drawCard());
+}
+
+//Shuffle the Regular and Elite Units Deck
+void Game::shuffleUnits(){
+  const int swaps = 500;
+  int p1, p2;
+  Unit* aux;
+
+  for(int i = 0; i < swaps; i++){
+    p1 = rand()%(state.RegularUnitsDeck.size());
+    p2 = rand()%(state.RegularUnitsDeck.size());
+    aux = state.RegularUnitsDeck[p1];
+    state.RegularUnitsDeck[p1] = state.RegularUnitsDeck[p2];
+    state.RegularUnitsDeck[p2] = aux;
+
+    p1 = rand()%(state.EliteUnitsDeck.size());
+    p2 = rand()%(state.EliteUnitsDeck.size());
+    aux = state.EliteUnitsDeck[p1];
+    state.EliteUnitsDeck[p1] = state.EliteUnitsDeck[p2];
+    state.EliteUnitsDeck[p2] = aux;
+  }
 }
 
 void Game::rollSourceDie(int dieN){
@@ -156,11 +274,17 @@ void Game::step(ACTION action, int actionParam){
     case USE_CARD_STRONG:
       stepUseCardStrong(actionParam);
       break;
+    case USE_CARD_SIDEWAYS:
+      stepUseCardSideways(actionParam);
+      break;
     case TAKE_DIE_FROM_SOURCE:
       stepTakeDieFromSource(actionParam);
       break;
     case MOVE_TO_ADJACENT_HEX:
       stepMoveToHex(actionParam);
+      break;
+    case REVEAL_ADJEACENT_TILE:
+      stepRevealTile(actionParam);
       break;
     case RECRUIT_UNIT:
       stepRecruitUnit(actionParam);
@@ -168,11 +292,12 @@ void Game::step(ACTION action, int actionParam){
     case END_TURN:
       stepEndTurn(actionParam);
       break;
+    case USE_UNIT:
+      stepUseUnit(actionParam);
+      break;
     case QUIT_GAME:
       state.gameOver = true;
       break;
-    default:
-      return;
   }
 }
 
@@ -208,12 +333,15 @@ void Game::printState(){
       printf("%s ", state.hand[i]->getName().c_str());
   printf("\n\n");
 
-  printf("Cards in Deed Deck: %d\nCards in Discard Pile: %d\n\n", state.playerDeedDeck.getSize(), state.playerDiscardDeck.getSize());
+  printf("Cards in Deed Deck: %02d               Units:", state.playerDeedDeck.getSize());
+  for(int i = 0; i < state.PlayerUnits.size(); i++)
+    printf(" %s", state.PlayerUnits[i]->getName().c_str());
 
-  printf("Current Round: %d", state.currentRound);
-  printf("                      Units in offer:");
+  printf("\nCards in Discard Pile: %02d            Units in offer:", state.playerDiscardDeck.getSize());
   for(int i = 0; i < state.UnitOffer.size(); i++)
     printf(" %s", state.UnitOffer[i]->getName().c_str());
+
+  printf("\nCurrent Round: %d", state.currentRound);
 
   //Fame
   printf("\nFame: %d\nReputation: %d\n\n", state.exp, state.reputation);
@@ -502,6 +630,45 @@ void Game::stepUseCardStrong(int actionParam){
   }
 }
 
+void Game::stepUseCardSideways(int actionParam){
+  if(actionParam < 0 || actionParam > state.hand.size() || state.hand[actionParam]->getCardType() == WOUND)
+    return;
+
+  std::vector<std::string> choices;
+	choices.push_back("Attack 1");
+	choices.push_back("Block 1");
+	choices.push_back("Move 1");
+	choices.push_back("Influence 1");
+
+  switch(state.player->chooseOption(choices)){
+    case 0:
+      state.avAttack++;
+      break;
+    case 1:
+      state.avBlock++;
+      break;
+    case 2:
+      state.avMove++;
+      break;
+    case 3:
+      state.avInfluence++;
+      break;
+  }
+
+  state.playerDiscardDeck.addCardTop(state.hand[actionParam]);
+  state.hand.erase(state.hand.begin() + actionParam);
+}
+
+void Game::stepUseUnit(int actionParam){
+  if(actionParam < 0 || actionParam >= state.PlayerUnits.size())
+    return;
+
+  if(state.PlayerUnits[actionParam]->isReady()){
+    state.PlayerUnits[actionParam]->playEffect(&state);
+    state.PlayerUnits[actionParam]->setReady(false);
+  }
+}
+
 void Game::stepMoveToHex(int actionParam){
   if(actionParam < 0 || actionParam > 6)
     return;
@@ -509,13 +676,68 @@ void Game::stepMoveToHex(int actionParam){
   HEX *next = state.curHex->neighboors[actionParam];
   int moveCost;
 
+  static const short int refTableHex[7][6] = {{5, 6, 4, 1, 2, 3},
+                                              {6, 2, 0, 5, 3, 4},
+                                              {4, 0, 6, 3, 1, 5},
+                                              {0, 1, 2, 4, 5, 6},
+                                              {1, 5, 3, 0, 6, 2},
+                                              {2, 3, 1, 6, 4, 0},
+                                              {3, 4, 5, 2, 0, 1}};
+
+  static const short int refTableTile[NUM_TILES][7][6] = {{{ 2, 2,-1, 0, 0, 0}, { 2, 1, 0, 1, 0, 0}, {-1, 0,-1, 0,-1, 0}, { 0, 0, 0, 0, 0, 0}, { 0, 1, 0,-1, 0,-1}, { 0, 0,-1, 0,-1,-1}, { 0, 0, 0,-1,-1,-1}},
+                                                          {{ 4, 4, 2, 1, 1, 1}, { 4, 3, 1, 3, 1 ,1}, { 2, 1, 2, 1, 0, 1}, { 1, 1, 1, 1, 1, 1}, { 1, 3, 1,-1, 1,-1}, { 1, 1, 0, 1, 0,-1}, { 1, 1, 1,-1,-1,-1}},
+                                                          {{ 5, 5,-1, 2, 2, 2}, { 5, 4, 2, 4, 2, 2}, {-1, 2,-1, 2,-1, 2}, { 2, 2, 2, 2, 2, 2}, { 2, 4, 2, 1, 2, 1}, { 2, 2,-1, 2,-1, 0}, { 2, 2, 2, 1, 0, 0}},
+                                                          {{ 7, 7, 4, 3, 3, 3}, { 7, 6, 3, 6, 3, 3}, { 4, 3, 4, 3, 1, 3}, { 3, 3, 3, 3, 3, 3}, { 3, 6, 3,-1, 3,-1}, { 3, 3, 1, 3, 1,-1}, { 3, 3, 3,-1,-1,-1}},
+                                                          {{ 8, 8, 5, 4, 4, 4}, { 8, 7, 4, 7, 4, 4}, { 5, 4, 5, 4, 2, 4}, { 4, 4, 4, 4, 4, 4}, { 4, 7, 4, 3, 4, 3}, { 4, 4, 2, 4, 2, 1}, { 4, 4, 4, 3, 1, 1}},
+                                                          {{ 9, 9,-1, 5, 5, 5}, { 9, 8, 5, 8, 5, 5}, {-1, 5,-1, 5,-1, 5}, { 5, 5, 5, 5, 5, 5}, { 5, 8, 5, 4, 5, 4}, { 5, 5,-1, 5,-1, 2}, { 5, 5, 5, 4, 2, 2}},
+                                                          {{11,11, 7, 6, 6, 6}, {11,10, 6,10, 6, 6}, { 7, 6, 7, 6, 3, 6}, { 6, 6, 6, 6, 6, 6}, { 6,10, 6,-1, 6,-1}, { 6, 6, 3, 6, 3,-1}, { 6, 6, 6,-1,-1,-1}},
+                                                          {{12,12, 8, 7, 7, 7}, {12,11, 7,11, 7, 7}, { 8, 7, 8, 7, 4, 7}, { 7, 7, 7, 7, 7, 7}, { 7,11, 7, 6, 7, 6}, { 7, 7, 4, 7, 4, 3}, { 7, 7, 7, 6, 3, 3}},
+                                                          {{13,13, 9, 8, 8, 8}, {13,12, 8,12, 8, 8}, { 9, 8, 9, 8, 5, 8}, { 8, 8, 8, 8, 8, 8}, { 8,12, 8, 7, 8, 7}, { 8, 8, 5, 8, 5, 4}, { 8, 8, 8, 7, 4, 4}},
+                                                          {{14,14,-1, 9, 9, 9}, {14,13, 9,13, 9, 9}, {-1, 9,-1, 9,-1, 9}, { 9, 9, 9, 9, 9, 9}, { 9,13, 9, 8, 9, 8}, { 9, 9,-1, 9,-1, 5}, { 9, 9, 9, 8, 5, 5}},
+                                                          {{-1,-1,11,10,10,10}, {-1,-1,10,-1,10,10}, {11,10,11,10, 6,10}, {10,10,10,10,10,10}, {10,-1,10,-1,10,-1}, {10,10, 6,10, 6,-1}, {10,10,10,-1,-1,-1}},
+                                                          {{-1,-1,12,11,11,11}, {-1,-1,11,-1,11,11}, {12,11,12,11, 7,11}, {11,11,11,11,11,11}, {11,-1,11,10,11,10}, {11,11, 7,11, 7, 6}, {11,11,11,10, 6, 6}},
+                                                          {{-1,-1,13,12,12,12}, {-1,-1,12,-1,12,12}, {13,12,13,12, 8,12}, {12,12,12,12,12,12}, {12,-1,12,11,12,11}, {12,12, 8,12, 8, 8}, {12,12,12,11, 7, 7}},
+                                                          {{-1,-1,14,13,13,13}, {-1,-1,13,-1,13,13}, {14,13,14,13, 9,13}, {13,13,13,13,13,13}, {13,-1,13,12,13,12}, {13,13, 9,13, 9, 7}, {13,13,13,12, 8, 8}},
+                                                          {{-1,-1,-1,14,14,14}, {-1,-1,14,-1,14,14}, {-1,14,-1,14,-1,14}, {14,14,14,14,14,14}, {14,-1,14,13,14,13}, {14,14,-1,14,-1, 9}, {14,14,14,13, 9, 9}}};
+
   if(next != NULL && next->terrain != NONET){
     moveCost = state.m->getMoveCost(*next, state.isDayNight);
-    if(state.avMove > moveCost){
+    if(state.avMove >= moveCost){
       state.avMove = state.avMove - moveCost;
       state.curHex = next;
+
+      state.curTileN = refTableTile[state.curTileN][state.curHexN][actionParam];
+      state.curHexN = refTableHex[state.curHexN][actionParam];
     }
   }
+}
+
+void Game::stepRevealTile(int actionParam){
+  if(actionParam != 0 && actionParam != 1 || state.avMove < 2) //0 - Up, 1 - Down
+    return;
+
+  bool result;
+
+  static const short int refMatrix[NUM_TILES][7][2] = {{{ 2,-1}, { 2, 1}, {-1,-1}, {-1,-1}, { 1,-1}, {-1,-1}, {-1,-1}},
+                                                       {{ 4, 2}, { 4, 3}, { 2, 0}, {-1,-1}, { 3,-1}, { 0,-1}, {-1,-1}},
+                                                       {{ 5,-1}, { 5, 4}, {-1,-1}, {-1,-1}, { 4, 1}, { 0,-1}, { 1, 0}},
+                                                       {{ 7, 4}, { 7, 6}, { 4, 1}, {-1,-1}, { 6,-1}, { 1,-1}, {-1,-1}},
+                                                       {{ 8, 5}, { 8, 7}, { 5, 2}, {-1,-1}, { 7, 3}, { 2, 1}, { 3, 1}},
+                                                       {{ 9,-1}, { 9, 8}, {-1,-1}, {-1,-1}, { 8, 4}, { 1,-1}, { 4, 1}},
+                                                       {{11, 7}, {11,10}, { 7, 3}, {-1,-1}, {10,-1}, { 3,-1}, {-1,-1}},
+                                                       {{12, 8}, {12,11}, { 8, 4}, {-1,-1}, {11, 6}, { 4, 3}, { 6, 3}},
+                                                       {{13, 9}, {13,12}, { 9, 5}, {-1,-1}, {12, 7}, { 5, 4}, { 7, 4}},
+                                                       {{14,-1}, {14,13}, {-1,-1}, {-1,-1}, {14, 8}, { 5,-1}, { 7, 5}},
+                                                       {{11,-1}, {-1,-1}, {11, 6}, {-1,-1}, {-1,-1}, { 6,-1}, {-1,-1}},
+                                                       {{12,-1}, {-1,-1}, {12, 7}, {-1,-1}, {10,-1}, { 7, 6}, {10, 6}},
+                                                       {{13,-1}, {-1,-1}, {13, 8}, {-1,-1}, {11,-1}, { 8, 7}, {11, 7}},
+                                                       {{14,-1}, {-1,-1}, {14, 9}, {-1,-1}, {12,-1}, { 9, 8}, {12, 8}},
+                                                       {{-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {13,-1}, { 9,-1}, {13, 9}}};
+
+  result = state.m->revealTile(refMatrix[state.curTileN][state.curHexN][actionParam]);
+
+  if(result)
+    state.avMove = state.avMove - 2;
 }
 
 void Game::stepTakeDieFromSource(int actionParam){

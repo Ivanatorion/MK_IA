@@ -1,24 +1,22 @@
 #include "../../include/Units/Unit.h"
 
 void Unit::tryToRecruit(STATE *s){
-  LOCATION l = s->curHex->location;
-
   bool onValidLocation = false;
+  
   for(int i = 0; i < this->recruitableLocations.size(); i++){
-    if(this->recruitableLocations[i] == l)
+    if(this->recruitableLocations[i] == s->curHex->location)
       onValidLocation = true;
   }
   if(!onValidLocation || this->influenceCost > s->avInfluence)
     return;
 
-  s->avInfluence = s->avInfluence - this->influenceCost;
-
-  s->PlayerUnits.push_back(this);
-
-  //If this method was called when the Unit was in the offer, everything should be fine...
   int i = 0;
-  while(s->UnitOffer[i] != this)
+  while(s->UnitOffer[i] != this && i <  s->UnitOffer.size())
     i++;
 
-  s->UnitOffer.erase(s->UnitOffer.begin() + i);
+  if(i < s->UnitOffer.size()){
+    s->UnitOffer.erase(s->UnitOffer.begin() + i);
+    s->PlayerUnits.push_back(this);
+    s->avInfluence = s->avInfluence - this->influenceCost;
+  }
 }

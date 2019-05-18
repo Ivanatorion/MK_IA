@@ -5,6 +5,8 @@
 ACTranquility::ACTranquility(){
 	this->color = GREEN;
 	this->cardtype = ACTIONCARD;
+	this->choicesWeak = 1;
+  this->choicesStrong = 1;
 }
 
 std::string ACTranquility::getName(){

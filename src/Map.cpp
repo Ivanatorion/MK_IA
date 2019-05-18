@@ -167,13 +167,90 @@ Map::Map(){
   this->initTileStack();
 }
 
-void Map::revealTile(int tilePos){
-  if(tilesRevealed[tilePos])
-    return;
+bool Map::revealTile(int tilePos){
+  if(tilePos < 0 || tilePos > NUM_TILES - 1 || tilesRevealed[tilePos])
+    return false;
 
   tiles[tilePos] = tileStack[0];
   tileStack.erase(tileStack.begin());
   tilesRevealed[tilePos] = true;
+
+  //Adjusts neighboors
+  static const short int refTable[NUM_TILES][6] = {{ 2, 1,-1,-1,-1,-1},
+                                                   { 4, 3,-1,-1, 0, 2},
+                                                   { 4, 4, 1, 0,-1,-1},
+                                                   { 7, 6,-1,-1, 1, 4},
+                                                   { 8, 7, 3, 1, 2, 5},
+                                                   { 9, 8, 4, 2,-1,-1},
+                                                   {11,10,-1,-1, 3, 7},
+                                                   {12,11, 6, 3, 4, 8},
+                                                   {13,12, 7, 4, 5, 9},
+                                                   {14,13, 8, 5,-1,-1},
+                                                   {-1,-1,-1,-1, 6,11},
+                                                   {-1,-1,10, 6, 7,12},
+                                                   {-1,-1,11, 7, 8,13},
+                                                   {-1,-1,12, 8, 9,14},
+                                                   {-1,-1,13, 9,-1,-1}};
+
+  TILE *curT;
+  TILE *tileRev = &tiles[tilePos];
+  for(int i = 0; i < 6; i++){
+    if(refTable[tilePos][i] != -1 && tilesRevealed[refTable[tilePos][i]]){
+      curT = &tiles[refTable[tilePos][i]];
+      switch (i) {
+        case 0:
+          curT->hexes[5]->neighboors[5] = tileRev->hexes[0];
+          curT->hexes[6]->neighboors[4] = tileRev->hexes[0];
+          curT->hexes[6]->neighboors[5] = tileRev->hexes[1];
+          tileRev->hexes[0]->neighboors[0] = curT->hexes[5];
+          tileRev->hexes[0]->neighboors[1] = curT->hexes[6];
+          tileRev->hexes[1]->neighboors[0] = curT->hexes[6];
+          break;
+        case 1:
+          curT->hexes[2]->neighboors[4] = tileRev->hexes[1];
+          curT->hexes[5]->neighboors[2] = tileRev->hexes[1];
+          curT->hexes[5]->neighboors[4] = tileRev->hexes[4];
+          tileRev->hexes[1]->neighboors[1] = curT->hexes[2];
+          tileRev->hexes[1]->neighboors[3] = curT->hexes[5];
+          tileRev->hexes[4]->neighboors[1] = curT->hexes[5];
+          break;
+        case 2:
+          curT->hexes[0]->neighboors[2] = tileRev->hexes[4];
+          curT->hexes[2]->neighboors[0] = tileRev->hexes[4];
+          curT->hexes[2]->neighboors[2] = tileRev->hexes[6];
+          tileRev->hexes[4]->neighboors[3] = curT->hexes[0];
+          tileRev->hexes[4]->neighboors[5] = curT->hexes[2];
+          tileRev->hexes[6]->neighboors[3] = curT->hexes[2];
+          break;
+        case 3:
+          curT->hexes[0]->neighboors[0] = tileRev->hexes[5];
+          curT->hexes[0]->neighboors[1] = tileRev->hexes[6];
+          curT->hexes[1]->neighboors[0] = tileRev->hexes[6];
+          tileRev->hexes[5]->neighboors[5] = curT->hexes[0];
+          tileRev->hexes[6]->neighboors[4] = curT->hexes[0];
+          tileRev->hexes[6]->neighboors[5] = curT->hexes[1];
+          break;
+        case 4:
+          curT->hexes[1]->neighboors[1] = tileRev->hexes[2];
+          curT->hexes[1]->neighboors[3] = tileRev->hexes[5];
+          curT->hexes[4]->neighboors[1] = tileRev->hexes[5];
+          tileRev->hexes[2]->neighboors[4] = curT->hexes[1];
+          tileRev->hexes[5]->neighboors[2] = curT->hexes[1];
+          tileRev->hexes[5]->neighboors[4] = curT->hexes[4];
+          break;
+        case 5:
+          curT->hexes[4]->neighboors[3] = tileRev->hexes[0];
+          curT->hexes[4]->neighboors[5] = tileRev->hexes[2];
+          curT->hexes[6]->neighboors[3] = tileRev->hexes[2];
+          tileRev->hexes[0]->neighboors[2] = curT->hexes[4];
+          tileRev->hexes[2]->neighboors[0] = curT->hexes[4];
+          tileRev->hexes[2]->neighboors[2] = curT->hexes[6];
+          break;
+      }
+    }
+  }
+
+  return true;
 }
 
 int Map::getMoveCost(HEX h, bool isDay){

@@ -5,6 +5,8 @@
 ACManaDraw::ACManaDraw(){
 	this->color = WHITE;
 	this->cardtype = ACTIONCARD;
+	this->choicesWeak = 0;
+  this->choicesStrong = 2;
 }
 
 std::string ACManaDraw::getName(){

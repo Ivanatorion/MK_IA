@@ -3,6 +3,8 @@
 ACStamina::ACStamina(){
   this->color = BLUE;
   this->cardtype = ACTIONCARD;
+  this->choicesWeak = 0;
+  this->choicesStrong = 0;
 }
 
 std::string ACStamina::getName(){
@@ -15,7 +17,7 @@ void ACStamina::playCardWeak(STATE *s){
 
 void ACStamina::playCardStrong(STATE *s){
   s->avMove = s->avMove + 4;
-  
+
   if(s->ConcentrationNextCard)
     s->avMove = s->avMove + 2;
 }

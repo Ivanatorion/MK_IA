@@ -5,6 +5,8 @@
 ACInstinct::ACInstinct(){
 	this->color = RED;
 	this->cardtype = ACTIONCARD;
+	this->choicesWeak = 1;
+  this->choicesStrong = 1;
 }
 
 std::string ACInstinct::getName(){

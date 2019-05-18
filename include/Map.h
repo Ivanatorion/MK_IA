@@ -9,7 +9,7 @@
 #define NUM_COUNTRYSIDE_TILES 7
 
 enum TERRAIN {PLAIN, FOREST, DESERT, HILL, LAKE, MOUNTAIN, WASTELAND, SWAMP, NONET};
-enum LOCATION {VILLAGE, MINEG, MINEB, MINER, MINEW, MINEBG, MINERW, GLADE, ORC, TOWER, KEEP, MONASTERY, DEN, RUIN, DUNGEON, CAMP, MAZE, NONEL};
+enum LOCATION {VILLAGE, MINEG, MINEB, MINER, MINEW, MINEBG, MINERW, GLADE, ORC, TOWER, KEEP, MONASTERY, DEN, RUIN, DUNGEON, CAMP, MAZE, CITY_RED, CITY_GREEN, CITY_BLUE, CITY_WHITE, NONEL};
 
 typedef struct hex{
   struct hex *neighboors[6];
@@ -28,7 +28,7 @@ typedef struct til{
 class Map{
   public:
     Map();
-    void revealTile(int tilePos);        //Reveals a tile at a position.
+    bool revealTile(int tilePos);        //Reveals a tile at a position.
     TILE getTile(int p);                 //Returns the tile that is in the giver position "p" on the map. (Tile with tileN -1 if not revealed).
     void printStack();                   //Prints the current tile stack.
     int getMoveCost(HEX h, bool isDay);  //Returns the move cost to enter Hex

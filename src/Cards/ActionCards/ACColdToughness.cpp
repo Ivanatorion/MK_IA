@@ -5,6 +5,8 @@
 ACColdToughness::ACColdToughness(){
 	this->color = BLUE;
 	this->cardtype = ACTIONCARD;
+	this->choicesWeak = 1;
+  this->choicesStrong = 0;
 }
 
 std::string ACColdToughness::getName(){
@@ -12,7 +14,19 @@ std::string ACColdToughness::getName(){
 }
 
 void ACColdToughness::playCardWeak(STATE *s){
+	std::vector<std::string> choices;
+	choices.push_back("Attack 2");
+	choices.push_back("Ice Block 3");
+	int choice = s->player->chooseOption(choices);
 
+  switch (choice) {
+    case 0:
+      s->avAttack = s->avAttack + 2;
+      break;
+    case 1:
+      s->avBlock = s->avIceBlock + 3;
+      break;
+  }
 }
 
 void ACColdToughness::playCardStrong(STATE *s){

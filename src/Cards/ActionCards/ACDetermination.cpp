@@ -5,6 +5,8 @@
 ACDetermination::ACDetermination(){
   this->color = BLUE;
   this->cardtype = ACTIONCARD;
+  this->choicesWeak = 1;
+  this->choicesStrong = 0;
 }
 
 std::string ACDetermination::getName(){

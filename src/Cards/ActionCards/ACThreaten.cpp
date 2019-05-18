@@ -3,6 +3,8 @@
 ACThreaten::ACThreaten(){
 	this->color = RED;
 	this->cardtype = ACTIONCARD;
+	this->choicesWeak = 0;
+  this->choicesStrong = 0;
 }
 
 std::string ACThreaten::getName(){

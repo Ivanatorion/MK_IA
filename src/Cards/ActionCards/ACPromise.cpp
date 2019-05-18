@@ -3,6 +3,8 @@
 ACPromise::ACPromise(){
   this->color = WHITE;
   this->cardtype = ACTIONCARD;
+  this->choicesWeak = 0;
+  this->choicesStrong = 0;
 }
 
 std::string ACPromise::getName(){
