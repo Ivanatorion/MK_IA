@@ -8,6 +8,11 @@ class HumanPlayer : public Player{
     HumanPlayer();
     void takeAction(STATE state, ACTION *rAction, int *rParam);
     int chooseOption(std::vector<std::string> choices);
+
+  private:
+    void takeActionBattle(STATE state, ACTION *rAction, int *rParam);
+    void takeActionBattleAssign(STATE state, ACTION *rAction, int *rParam);
+    void takeActionMoveExplore(STATE state, ACTION *rAction, int *rParam);
 };
 
 #endif

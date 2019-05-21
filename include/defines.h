@@ -11,6 +11,11 @@
 
 enum COLOR {RED, GREEN, BLUE, WHITE, GOLD, BLACK, NONE}; //NONE for Artifacts
 enum CARDTYPE {ACTIONCARD, SPELLCARD, ARTIFACTCARD, WOUND};
+enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, USE_CARD_SIDEWAYS, USE_UNIT, MOVE_TO_ADJACENT_HEX,
+             TAKE_DIE_FROM_SOURCE, RECRUIT_UNIT, REVEAL_ADJEACENT_TILE, ATTACK_RAMPAGING_ENEMY,
+             SELECT_ENEMY, ATTACK_SELECTED_ENEMIES, BLOCK_ENEMY, ADVANCE_BATTLE_PHASE,
+             SELECT_ATTACK_TO_ASSING, ASSING_DAMAGE_TO_UNIT, ASSING_DAMAGE_TO_PLAYER, END_TURN, QUIT_GAME};
+enum GAME_SCENE {MOVE_AND_EXPLORE, BATTLE_RANGED, BATTLE_BLOCK, BATTLE_ASSIGN, BATTLE_ATTACK};
 
 class Player;
 class Unit;
@@ -18,19 +23,32 @@ typedef struct stado{
   bool gameRunning;        //Game is running.
   bool gameOver;           //Game should end.
 
+  GAME_SCENE gameScene;    //The current phase of the game (Battle, Movement, Interaction...)
+
+  //Battle Containers
+  std::vector<ENEMY> BattleEnemies;
+  std::vector<ENEMY> BattleEnemiesSelected;
+  std::vector<ENEMY_ATTACK> BattleAttacksToAssign;
+  std::vector<ENEMY_ATTACK> BattleAttacksSelected;
+
+  //Pointer to the Hex Which Contains an enemy that should be removed if the player defeats it in battle.
+  HEX *rampagingHexAttacked;
+
+  //Unit Containers
   std::vector<Unit*> PlayerUnits;
   std::vector<Unit*> UnitOffer;
   std::vector<Unit*> RegularUnitsDeck;
   std::vector<Unit*> EliteUnitsDeck;
 
-  std::vector<Card*> hand; //Cards in the player hand.
-  int handMaxSize;         //Maximum cards the player can hold.
-  int currentRound;        //Current game round.
-  int exp;                 //The ammount of "fame" the player has.
-  int reputation;          //The level of reputation.
-  int curTile;             //curTile = number of the tile (in game number)
-  int curTileN;            //curTileN = number of the tile (in map position)
-  int curHexN;             //Number of the Hex in the tile
+  std::vector<Card*> playerHand;   //Cards in the player hand.
+  int playerHandMaxSize;           //Maximum cards the player can hold.
+  int currentRound;                //Current game round.
+  int playerFame;                  //The ammount of "fame" the player has.
+  int playerReputation;            //The level of reputation.
+  int curTile;                     //curTile = number of the tile (in game number)
+  int curTileN;                    //curTileN = number of the tile (in map position)
+  int curHexN;                     //Number of the Hex in the tile
+  int playerArmor;
   HEX *curHex;
 
   Map *m; //The map.
@@ -68,7 +86,5 @@ typedef struct stado{
   int fameToGain;
   int repToGain;
 } STATE;
-
-enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, USE_CARD_SIDEWAYS, USE_UNIT, MOVE_TO_ADJACENT_HEX, TAKE_DIE_FROM_SOURCE, RECRUIT_UNIT, REVEAL_ADJEACENT_TILE, END_TURN, QUIT_GAME};
 
 #endif

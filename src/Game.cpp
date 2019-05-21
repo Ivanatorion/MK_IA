@@ -48,6 +48,8 @@
 #include "../include/Cards/ActionCards/ACThreaten.h"
 #include "../include/Cards/ActionCards/ACTranquility.h"
 
+#include "../include/Cards/Wound.h"
+
 Game::Game(Player *player){
   this->state.player = player;
   state.m = NULL;
@@ -73,8 +75,48 @@ std::string Game::colorToString(COLOR c){
   }
 }
 
+//Advances the Game to the next Round
+void Game::resetRound(){
+  state.currentRound++;
+  state.isDayNight = (state.currentRound%2 == 1);
+  state.gameScene = MOVE_AND_EXPLORE;
+
+  //Re-roll the dice in the Source.
+  int specialColorCount;
+  do{
+    specialColorCount = 0;
+    for(int i = 0; i < N_DICE_IN_SOURCE; i++){
+      this->rollSourceDie(i);
+      if(state.sourceDice[i] == BLACK || state.sourceDice[i] == GOLD)
+        specialColorCount++;
+    }
+  } while(specialColorCount > N_DICE_IN_SOURCE - specialColorCount);
+
+  //Refresh the Unit Offer.
+  for(int i = 0; i < state.UnitOffer.size(); i++)
+    delete state.UnitOffer[i];
+  state.UnitOffer.clear();
+  for(int i = 0; i < N_UNITS_IN_OFFER; i++){
+    if(i % 2 == 0 && state.m->isCoreTileRevealed()){
+      state.UnitOffer.push_back(state.EliteUnitsDeck[state.EliteUnitsDeck.size()-1]);
+      state.EliteUnitsDeck.erase(state.EliteUnitsDeck.end() - 1);
+    }
+    else{
+      state.UnitOffer.push_back(state.RegularUnitsDeck[state.RegularUnitsDeck.size()-1]);
+      state.RegularUnitsDeck.erase(state.RegularUnitsDeck.end() - 1);
+    }
+  }
+
+  //Shuffles the Player Deed Deck and draw up to its hand maximum size.
+  while(!state.playerDiscardDeck.isEmpty())
+    state.playerDeedDeck.addCardTop(state.playerDiscardDeck.drawCard());
+  state.playerDeedDeck.shuffle();
+  for(int i = 0; i < state.playerHandMaxSize; i++)
+    state.playerHand.push_back(state.playerDeedDeck.drawCard());
+}
+
 //Resets the Game
-void Game::reset(){
+void Game::resetGame(){
   if(state.m != NULL)
     delete state.m;
 
@@ -82,19 +124,30 @@ void Game::reset(){
   state.m->revealTile(1);
   state.m->revealTile(2);
 
-  state.currentRound = 1;
-  state.exp = 0;
-  state.reputation = 0;
-  state.handMaxSize = 5;
-  state.avAttack = 0;
-  state.avBlock = 0;
-  state.avMove = 0;
-  state.avInfluence = 0;
+  state.rampagingHexAttacked = NULL;
+
+  state.currentRound = 0;
+
+  //Player Attributes
+  state.playerFame = 0;
+  state.playerReputation = 0;
+  state.playerHandMaxSize = 5;
+  state.playerArmor = 2;
+
   state.avHeal = 0;
   state.curTileN = 0;
   state.curHexN = 3;
   state.curTile = 0;
   state.curHex = state.m->getTile(0).hexes[3];
+
+  state.avMove = 0;
+  state.avInfluence = 0;
+
+  clearStateAvs();
+
+  state.BattleEnemies.clear();
+  state.BattleEnemiesSelected.clear();
+  state.BattleAttacksToAssign.clear();
 
   state.RegularUnitsDeck.clear();
   state.EliteUnitsDeck.clear();
@@ -122,18 +175,7 @@ void Game::reset(){
   state.fameToGain = 0;
   state.repToGain = 0;
 
-  int specialColorCount;
-  do{
-    specialColorCount = 0;
-    for(int i = 0; i < N_DICE_IN_SOURCE; i++){
-      this->rollSourceDie(i);
-      if(state.sourceDice[i] == BLACK || state.sourceDice[i] == GOLD)
-        specialColorCount++;
-    }
-  } while(specialColorCount > N_DICE_IN_SOURCE - specialColorCount);
-
   state.diceTaken = false;
-  state.isDayNight = true;
   state.gameOver = false;
 
   state.playerDeedDeck.addCardTop(new ACCrystallize());
@@ -152,7 +194,6 @@ void Game::reset(){
   state.playerDeedDeck.addCardTop(new ACSwiftness());
   state.playerDeedDeck.addCardTop(new ACSwiftness());
   state.playerDeedDeck.addCardTop(new ACTranquility());
-  state.playerDeedDeck.shuffle();
 
   state.RegularUnitsDeck.push_back(new UForesters());
   state.RegularUnitsDeck.push_back(new UForesters());
@@ -213,13 +254,7 @@ void Game::reset(){
   state.EliteUnitsDeck.push_back(new UHeroesWhite());
   this->shuffleUnits();
 
-  for(int i = 0; i < N_UNITS_IN_OFFER; i++){
-    state.UnitOffer.push_back(state.RegularUnitsDeck[state.RegularUnitsDeck.size()-1]);
-    state.RegularUnitsDeck.erase(state.RegularUnitsDeck.end() - 1);
-  }
-
-  for(int i = 0; i < state.handMaxSize; i++)
-    state.hand.push_back(state.playerDeedDeck.drawCard());
+  this->resetRound();
 }
 
 //Shuffle the Regular and Elite Units Deck
@@ -243,6 +278,7 @@ void Game::shuffleUnits(){
   }
 }
 
+//Rolls a die in the Source
 void Game::rollSourceDie(int dieN){
   switch (rand()%6) {
     case 0:
@@ -266,6 +302,27 @@ void Game::rollSourceDie(int dieN){
   }
 }
 
+//The "step" function makes the game "state" transition based on input "action/actionParam"
+/*
+  The "actionParam" gives aditional information on how to execute the action. This information is, for each action:
+
+  NOTHING = Unused
+  USE_CARD_WEAK = Which card in the Player hand should be played
+  USE_CARD_STRONG = Which card in the Player hand should be played
+  USE_CARD_SIDEWAYS = Which card in the Player hand should be played
+  USE_UNIT = Which Player Unit should be used
+  MOVE_TO_ADJACENT_HEX = Which adjacent HEX should the Player move (0 being TOPLEFT, increasing clockwise)
+  TAKE_DIE_FROM_SOURCE = Which die the Player will take
+  RECRUIT_UNIT = Which Unit (position in UnitOffer) the Player will recruit
+  REVEAL_ADJEACENT_TILE = 0 if revealing "Upmost" Tile, 1 if revealing "Downmost" TILE
+  ATTACK_RAMPAGING_ENEMY = Which adjacent HEX the Enemy is (0 being TOPLEFT, increasing clockwise)
+  SELECT_ENEMY = Which Enemy to be selected
+  ATTACK_SELECTED_ENEMIES = Unused
+  BLOCK_ENEMY_IN_BATTLE = Which Enemy from the BattleEnemies vector the Player will attack
+  ADVANCE_BATTLE_PHASE = Unused
+  END_TURN = Unused
+  QUIT_GAME = Unused
+*/
 void Game::step(ACTION action, int actionParam){
   switch (action) {
     case USE_CARD_WEAK:
@@ -289,6 +346,30 @@ void Game::step(ACTION action, int actionParam){
     case RECRUIT_UNIT:
       stepRecruitUnit(actionParam);
       break;
+    case ATTACK_RAMPAGING_ENEMY:
+      stepAttackRampagingEnemy(actionParam);
+      break;
+    case SELECT_ENEMY:
+      stepSelectEnemy(actionParam);
+      break;
+    case SELECT_ATTACK_TO_ASSING:
+      stepSelectAttackToAssign(actionParam);
+      break;
+    case ATTACK_SELECTED_ENEMIES:
+      stepAttackSelectedEnemies(actionParam);
+      break;
+    case ADVANCE_BATTLE_PHASE:
+      stepAdvanceBattlePhase(actionParam);
+      break;
+    case BLOCK_ENEMY:
+      stepBlockEnemy(actionParam);
+      break;
+    case ASSING_DAMAGE_TO_UNIT:
+      stepAssingDamageUnit(actionParam);
+      break;
+    case ASSING_DAMAGE_TO_PLAYER:
+      stepAssingDamagePlayer(actionParam);
+      break;
     case END_TURN:
       stepEndTurn(actionParam);
       break;
@@ -301,11 +382,12 @@ void Game::step(ACTION action, int actionParam){
   }
 }
 
+//Runs the game main loop
 void Game::run(){
   ACTION nextAction;
   int nextParam;
 
-  this->reset();
+  this->resetGame();
   state.gameRunning = true;
 
   while(!this->state.gameOver){
@@ -317,20 +399,213 @@ void Game::run(){
   state.gameRunning = false;
 }
 
+//Prints information about the current State
 void Game::printState(){
   if(!state.gameRunning){
     printf("\nGame is not running\n");
     return;
   }
 
+  switch (state.gameScene) {
+    case MOVE_AND_EXPLORE:
+      printStateMoveExplore();
+      break;
+    case BATTLE_BLOCK:
+    case BATTLE_ATTACK:
+    case BATTLE_RANGED:
+    case BATTLE_ASSIGN:
+      printStateBattle();
+      break;
+  }
+}
+
+void Game::printStateBattle(){
+  printf("\n################################################################################\n");
+  printf("\nIn Battle Phase: ");
+  switch (state.gameScene) {
+    case BATTLE_RANGED:
+      printf("Ranged Attack");
+      break;
+    case BATTLE_BLOCK:
+      printf("Block");
+      break;
+    case BATTLE_ASSIGN:
+      printf("Assign Damage");
+      break;
+    case BATTLE_ATTACK:
+      printf("Attack");
+      break;
+  }
+
+  //Cards in Hand
+  printf("\n\nCards in hand: ");
+  if(state.playerHand.size() == 0)
+    printf("None");
+  else
+    for(int i = 0; i < state.playerHand.size(); i++)
+      printf("%s ", state.playerHand[i]->getName().c_str());
+  printf("\n\n");
+
+  printf("Cards in Deed Deck: %02d               Units:", state.playerDeedDeck.getSize());
+  for(int i = 0; i < state.PlayerUnits.size(); i++)
+    printf(" %s", state.PlayerUnits[i]->getName().c_str());
+
+  printf("\nCards in Discard Pile: %02d            Units in offer:", state.playerDiscardDeck.getSize());
+  for(int i = 0; i < state.UnitOffer.size(); i++)
+    printf(" %s", state.UnitOffer[i]->getName().c_str());
+
+  printf("\nSource: ");
+  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
+    printf("%s ", colorToString(state.sourceDice[i]).c_str());
+
+    //Attributes
+  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\n", state.avAttack, state.avBlock, state.avMove, state.avInfluence);
+
+  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", state.playerCrystalsRed, state.playerCrystalsBlue, state.playerCrystalsGreen, state.playerCrystalsWhite);
+  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n\n", state.playerTokensRed, state.playerTokensBlue, state.playerTokensGreen, state.playerTokensWhite);
+
+  switch (state.gameScene) {
+    case BATTLE_RANGED:
+      printStateBattleRanged();
+      break;
+    case BATTLE_BLOCK:
+      printStateBattleBlock();
+      break;
+    case BATTLE_ASSIGN:
+      printStateBattleAssing();
+      break;
+    case BATTLE_ATTACK:
+      printStateBattleAttack();
+      break;
+  }
+
+  printf("\n\nSpecial:\n\n");
+
+  if(state.ManaDrawWeakActive)
+    printf("Can take extra dice (ManaDraw)\n");
+  if(state.ConcentrationNextCard)
+    printf("Next Strong Card is empowered (Concentration)\n");
+
+  printf("\n################################################################################\n");
+}
+
+void Game::printStateBattleRanged(){
+  printf("Enemies: {");
+  for(int i = 0; i < state.BattleEnemies.size(); i++){
+    printf("\n  %s", state.BattleEnemies[i].name.c_str());
+    printf("\n    %d Health", state.BattleEnemies[i].health);
+  }
+  printf("\n}\n\nEnemies Selected: {");
+  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
+    printf("%s", state.BattleEnemiesSelected[i].name.c_str());
+    if(i != state.BattleEnemiesSelected.size()-1)
+      printf(", ");
+  }
+  printf("}");
+}
+
+void Game::printStateBattleBlock(){
+  printf("Enemies: {");
+  for(int i = 0; i < state.BattleEnemies.size(); i++){
+    printf("\n  %s", state.BattleEnemies[i].name.c_str());
+    for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+      if(state.BattleEnemies[i].attacks[j].blocked)
+        printf("\n    Blocked: ");
+      else
+        printf("\n    UnBlocked: ");
+      printf("%d ", state.BattleEnemies[i].attacks[j].attack);
+      switch (state.BattleEnemies[i].attacks[j].type) {
+        case PHYSICAL:
+          printf("Physical");
+          break;
+        case FIRE:
+          printf("Fire");
+          break;
+        case ICE:
+          printf("Ice");
+          break;
+        case COLDFIRE:
+          printf("ColdFire");
+          break;
+      }
+    }
+    printf("\n");
+  }
+  printf("\n}\n\nEnemies Selected: {");
+  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
+    printf("%s", state.BattleEnemiesSelected[i].name.c_str());
+    if(i != state.BattleEnemiesSelected.size()-1)
+      printf(", ");
+  }
+  printf("}");
+}
+
+void Game::printStateBattleAssing(){
+  printf("Attacks to Assign: ");
+  for(int i = 0; i < state.BattleAttacksToAssign.size(); i++){
+    if(i != 0)
+      printf(", ");
+    printf("%d ", state.BattleAttacksToAssign[i].attack);
+    switch (state.BattleAttacksToAssign[i].type) {
+      case PHYSICAL:
+        printf("Physical");
+        break;
+      case FIRE:
+        printf("Fire");
+        break;
+      case ICE:
+        printf("Ice");
+        break;
+      case COLDFIRE:
+        printf("ColdFire");
+        break;
+    }
+  }
+
+  printf("\n\nAttack Selected:");
+  for(int i = 0; i < state.BattleAttacksSelected.size(); i++){
+    printf(" %d ", state.BattleAttacksSelected[i].attack);
+    switch (state.BattleAttacksSelected[i].type) {
+      case PHYSICAL:
+        printf("Physical");
+        break;
+      case FIRE:
+        printf("Fire");
+        break;
+      case ICE:
+        printf("Ice");
+        break;
+      case COLDFIRE:
+        printf("ColdFire");
+        break;
+    }
+  }
+}
+
+void Game::printStateBattleAttack(){
+  printf("Enemies: {");
+  for(int i = 0; i < state.BattleEnemies.size(); i++){
+    printf("\n  %s", state.BattleEnemies[i].name.c_str());
+    printf("\n    %d Health", state.BattleEnemies[i].health);
+  }
+  printf("\n}\n\nEnemies Selected: {");
+  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
+    printf("%s", state.BattleEnemiesSelected[i].name.c_str());
+    if(i != state.BattleEnemiesSelected.size()-1)
+      printf(", ");
+  }
+  printf("}");
+}
+
+void Game::printStateMoveExplore(){
   printf("\n################################################################################\n");
   //Cards in Hand
   printf("\nCards in hand: ");
-  if(state.hand.size() == 0)
+  if(state.playerHand.size() == 0)
     printf("None");
   else
-    for(int i = 0; i < state.hand.size(); i++)
-      printf("%s ", state.hand[i]->getName().c_str());
+    for(int i = 0; i < state.playerHand.size(); i++)
+      printf("%s ", state.playerHand[i]->getName().c_str());
   printf("\n\n");
 
   printf("Cards in Deed Deck: %02d               Units:", state.playerDeedDeck.getSize());
@@ -344,7 +619,7 @@ void Game::printState(){
   printf("\nCurrent Round: %d", state.currentRound);
 
   //Fame
-  printf("\nFame: %d\nReputation: %d\n\n", state.exp, state.reputation);
+  printf("\nFame: %d\nReputation: %d\n\n", state.playerFame, state.playerReputation);
 
   printf("Source: ");
   for(int i = 0; i < N_DICE_IN_SOURCE; i++)
@@ -352,7 +627,7 @@ void Game::printState(){
 
 
   //Attributes
-  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\nHeal: %d\n\n", state.avAttack, state.avBlock, state.avMove, state.avInfluence, state.avHeal);
+  printf("\n\nMove: %d\nInfluence: %d\nHeal: %d\n\n", state.avMove, state.avInfluence, state.avHeal);
 
   //Location on map
   printf("Current map tile: %d\n", state.curTileN);
@@ -441,15 +716,14 @@ void Game::printState(){
     printf("Next Strong Card is empowered (Concentration)\n");
 
   printf("\n################################################################################\n");
-
 }
 
 void Game::stepUseCardWeak(int actionParam){
   bool hasMana = false;
   Card *aux;
 
-  if(actionParam < state.hand.size())
-    aux = state.hand[actionParam];
+  if(actionParam < state.playerHand.size())
+    aux = state.playerHand[actionParam];
   else
     return;
 
@@ -504,7 +778,7 @@ void Game::stepUseCardWeak(int actionParam){
   }
 
   state.playerDiscardDeck.addCardTop(aux);
-  state.hand.erase(state.hand.begin() + actionParam);
+  state.playerHand.erase(state.playerHand.begin() + actionParam);
   aux->playCardWeak(&state);
 }
 
@@ -512,8 +786,8 @@ void Game::stepUseCardStrong(int actionParam){
   bool hasMana = false;
   Card *aux;
 
-  if(actionParam < state.hand.size())
-    aux = state.hand[actionParam];
+  if(actionParam < state.playerHand.size())
+    aux = state.playerHand[actionParam];
   else
     return;
 
@@ -619,7 +893,7 @@ void Game::stepUseCardStrong(int actionParam){
   }
 
   state.playerDiscardDeck.addCardTop(aux);
-  state.hand.erase(state.hand.begin() + actionParam);
+  state.playerHand.erase(state.playerHand.begin() + actionParam);
 
   if(state.ConcentrationNextCard){
     aux->playCardStrong(&state);
@@ -631,7 +905,7 @@ void Game::stepUseCardStrong(int actionParam){
 }
 
 void Game::stepUseCardSideways(int actionParam){
-  if(actionParam < 0 || actionParam > state.hand.size() || state.hand[actionParam]->getCardType() == WOUND)
+  if(actionParam < 0 || actionParam > state.playerHand.size() || state.playerHand[actionParam]->getCardType() == WOUND)
     return;
 
   std::vector<std::string> choices;
@@ -655,8 +929,8 @@ void Game::stepUseCardSideways(int actionParam){
       break;
   }
 
-  state.playerDiscardDeck.addCardTop(state.hand[actionParam]);
-  state.hand.erase(state.hand.begin() + actionParam);
+  state.playerDiscardDeck.addCardTop(state.playerHand[actionParam]);
+  state.playerHand.erase(state.playerHand.begin() + actionParam);
 }
 
 void Game::stepUseUnit(int actionParam){
@@ -808,8 +1082,9 @@ void Game::stepRecruitUnit(int actionParam){
 
 void Game::stepEndTurn(int actionParam){
   state.diceTaken = false;
-  while(state.hand.size() < state.handMaxSize && !state.playerDeedDeck.isEmpty())
-    state.hand.push_back(state.playerDeedDeck.drawCard());
+  state.gameScene = MOVE_AND_EXPLORE;
+  while(state.playerHand.size() < state.playerHandMaxSize && !state.playerDeedDeck.isEmpty())
+    state.playerHand.push_back(state.playerDeedDeck.drawCard());
 
   state.playerTokensRed = 0;
   state.playerTokensBlue = 0;
@@ -837,8 +1112,8 @@ void Game::stepEndTurn(int actionParam){
   state.avIceBlock = 0;
   state.avHeal = 0;
 
-  state.exp = state.exp + state.fameToGain;
-  state.reputation = state.reputation + state.repToGain;
+  state.playerFame = state.playerFame + state.fameToGain;
+  state.playerReputation = state.playerReputation + state.repToGain;
 
   state.fameToGain = 0;
   state.repToGain = 0;
@@ -849,4 +1124,241 @@ void Game::stepEndTurn(int actionParam){
 
   state.ManaDrawWeakActive = false;
   state.ConcentrationNextCard = false;
+}
+
+void Game::stepAttackRampagingEnemy(int actionParam){
+  if(actionParam < 0 || actionParam > 6 || state.gameScene != MOVE_AND_EXPLORE)
+    return;
+  if(state.curHex->neighboors[actionParam]->location != ORC && state.curHex->neighboors[actionParam]->location != DRACONUM)
+    return;
+
+  state.gameScene = BATTLE_RANGED;
+  state.rampagingHexAttacked = state.curHex->neighboors[actionParam];
+  state.BattleEnemies.push_back(state.curHex->neighboors[actionParam]->faceUpEnemyToken);
+
+  for(int i = 0; i < state.BattleEnemies.size(); i++){
+    state.BattleEnemies[i].blocked = false;
+    for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+      state.BattleEnemies[i].attacks[j].blocked = false;
+    }
+  }
+}
+
+//Battle
+void Game::stepAttackSelectedEnemies(int actionParam){
+  if(state.gameScene != BATTLE_RANGED && state.gameScene != BATTLE_ATTACK)
+    return;
+
+  bool fireRes = false, iceRes = false, physRes = false, coldFireRes = false;
+  bool fort = false, doublefort = false;
+  int totalHealth = 0;
+  int totalAttack = 0;
+
+  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
+    if(state.BattleEnemiesSelected[i].fRes)
+      fireRes = true;
+    if(state.BattleEnemiesSelected[i].iRes)
+      iceRes = true;
+    if(state.BattleEnemiesSelected[i].pRes)
+      physRes = true;
+    if(state.BattleEnemiesSelected[i].fRes && state.BattleEnemiesSelected[i].iRes)
+      coldFireRes = true;
+
+    if(state.BattleEnemiesSelected[i].fortified)
+      fort = true;
+
+    totalHealth = totalHealth + state.BattleEnemiesSelected[i].health;
+  }
+
+  if(state.gameScene == BATTLE_RANGED && doublefort)
+    return;
+
+  totalAttack = totalAttack + state.avSiegeAttack / ((physRes) ? 2 : 1);
+  totalAttack = totalAttack + state.avSiegeIceAttack / ((iceRes) ? 2 : 1);
+  totalAttack = totalAttack + state.avSiegeFireAttack / ((fireRes) ? 2 : 1);
+  totalAttack = totalAttack + state.avSiegeColdFireAttack / ((coldFireRes) ? 2 : 1);
+
+  if(!(state.gameScene == BATTLE_RANGED && fort)){
+    totalAttack = totalAttack + state.avRangedAttack / ((physRes) ? 2 : 1);
+    totalAttack = totalAttack + state.avRangedIceAttack / ((iceRes) ? 2 : 1);
+    totalAttack = totalAttack + state.avRangedFireAttack / ((fireRes) ? 2 : 1);
+    totalAttack = totalAttack + state.avRangedColdFireAttack / ((coldFireRes) ? 2 : 1);
+  }
+
+  if(state.gameScene == BATTLE_ATTACK){
+    totalAttack = totalAttack + state.avAttack / ((physRes) ? 2 : 1);
+    totalAttack = totalAttack + state.avIceAttack / ((iceRes) ? 2 : 1);
+    totalAttack = totalAttack + state.avFireAttack / ((fireRes) ? 2 : 1);
+    totalAttack = totalAttack + state.avColdFireAttack / ((coldFireRes) ? 2 : 1);
+  }
+
+  if(totalAttack >= totalHealth){
+    for(int i = 0; i < state.BattleEnemiesSelected.size(); i++)
+      state.fameToGain = state.fameToGain + state.BattleEnemiesSelected[i].fameReward;
+
+    state.BattleEnemiesSelected.clear();
+
+    state.avAttack = 0;
+    state.avRangedAttack = 0;
+    state.avSiegeAttack = 0;
+    state.avFireAttack = 0;
+    state.avRangedFireAttack = 0;
+    state.avSiegeFireAttack = 0;
+    state.avIceAttack = 0;
+    state.avRangedIceAttack = 0;
+    state.avSiegeIceAttack = 0;
+    state.avColdFireAttack = 0;
+    state.avRangedColdFireAttack = 0;
+    state.avSiegeColdFireAttack = 0;
+  }
+}
+
+void Game::stepSelectEnemy(int actionParam){
+  if(state.gameScene != BATTLE_RANGED && state.gameScene != BATTLE_ATTACK && state.gameScene != BATTLE_BLOCK)
+    return;
+  if(actionParam < 0 || actionParam >= state.BattleEnemies.size())
+    return;
+
+  state.BattleEnemiesSelected.push_back(state.BattleEnemies[actionParam]);
+  state.BattleEnemies.erase(state.BattleEnemies.begin() + actionParam);
+}
+
+void Game::stepSelectAttackToAssign(int actionParam){
+  if(state.gameScene != BATTLE_ASSIGN)
+    return;
+  if(actionParam < 0 || actionParam >= state.BattleAttacksToAssign.size() || state.BattleAttacksSelected.size() > 0)
+    return;
+
+  state.BattleAttacksSelected.push_back(state.BattleAttacksToAssign[actionParam]);
+  state.BattleAttacksToAssign.erase(state.BattleAttacksToAssign.begin() + actionParam);
+}
+
+void Game::stepBlockEnemy(int actionParam){
+  if(state.gameScene != BATTLE_BLOCK || state.BattleEnemiesSelected.size() != 1)
+    return;
+
+  ENEMY e = state.BattleEnemiesSelected[0];
+
+  if(actionParam < 0 || actionParam >= e.attacks.size() || e.attacks[actionParam].blocked)
+    return;
+
+  ENEMY_ATTACK at = e.attacks[actionParam];
+
+  int totalBlock = 0;
+  totalBlock = totalBlock + state.avBlock / ((at.type != PHYSICAL) ? 2 : 1);
+  totalBlock = totalBlock + state.avFireBlock / ((at.type != PHYSICAL && at.type != ICE) ? 2 : 1);
+  totalBlock = totalBlock + state.avIceBlock / ((at.type != PHYSICAL && at.type != FIRE) ? 2 : 1);
+  totalBlock = totalBlock + state.avColdFireBlock;
+
+  if(totalBlock >= at.attack){
+    printf("%d >= %d\n", totalBlock, at.attack);
+    state.BattleEnemiesSelected[0].attacks[actionParam].blocked = true;
+
+    //Check if all attacks of this enemy were blocked
+    state.BattleEnemiesSelected[0].blocked = true;
+    for(int i = 0; i < state.BattleEnemiesSelected[0].attacks.size(); i++)
+      if(!state.BattleEnemiesSelected[0].attacks[i].blocked)
+        state.BattleEnemiesSelected[0].blocked = false;
+
+    //De-select the enemy
+    state.BattleEnemies.push_back(state.BattleEnemiesSelected[0]);
+    state.BattleEnemiesSelected.clear();
+
+    clearStateAvs();
+  }
+
+}
+
+void Game::stepAssingDamageUnit(int actionParam){
+  if(state.gameScene != BATTLE_ASSIGN || state.BattleAttacksSelected.size() != 1 || actionParam < 0 || actionParam >= state.PlayerUnits.size())
+    return;
+
+  if(state.PlayerUnits[actionParam]->isWounded())
+    return;
+
+  //Do something
+
+  state.BattleAttacksSelected.clear();
+}
+
+void Game::stepAssingDamagePlayer(int actionParam){
+  if(state.gameScene != BATTLE_ASSIGN || state.BattleAttacksSelected.size() != 1)
+    return;
+
+  //Do something
+  int atk = state.BattleAttacksSelected[0].attack;
+  while(atk > 0){
+    atk = atk - state.playerArmor;
+    state.playerHand.push_back(new Wound());
+  }
+
+  state.BattleAttacksSelected.clear();
+}
+
+void Game::stepAdvanceBattlePhase(int actionParam){
+  if(state.gameScene != BATTLE_BLOCK && state.gameScene != BATTLE_RANGED && state.gameScene != BATTLE_ATTACK && state.gameScene != BATTLE_ASSIGN)
+    return;
+
+  clearStateAvs();
+
+  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++)
+    state.BattleEnemies.push_back(state.BattleEnemiesSelected[i]);
+  state.BattleEnemiesSelected.clear();
+
+  if(state.gameScene == BATTLE_ATTACK){
+    state.gameScene = MOVE_AND_EXPLORE;
+    if(state.BattleEnemies.size() == 0){
+      if(state.rampagingHexAttacked != NULL){
+        state.rampagingHexAttacked->location = NONEL;
+        state.rampagingHexAttacked->faceUpEnemyToken.enemyType = NONEE;
+        state.rampagingHexAttacked = NULL;
+      }
+    }
+  }
+
+  else if(state.gameScene == BATTLE_RANGED){
+    state.gameScene = BATTLE_BLOCK;
+
+    //TODO: Deal with attacks that are summons
+  }
+
+  else if(state.gameScene == BATTLE_BLOCK){
+    state.BattleAttacksSelected.clear();
+    state.BattleAttacksToAssign.clear();
+    for(int i = 0; i < state.BattleEnemies.size(); i++){
+      for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+        if(!state.BattleEnemies[i].attacks[j].blocked)
+          state.BattleAttacksToAssign.push_back(state.BattleEnemies[i].attacks[j]);
+      }
+    }
+
+    state.gameScene = BATTLE_ASSIGN;
+  }
+
+  else if(state.gameScene == BATTLE_ASSIGN){
+    if(state.BattleAttacksToAssign.size() > 0)
+      return;
+
+    state.gameScene = BATTLE_ATTACK;
+  }
+}
+
+void Game::clearStateAvs(){
+  state.avAttack = 0;
+  state.avFireAttack = 0;
+  state.avIceAttack = 0;
+  state.avColdFireAttack = 0;
+  state.avRangedAttack = 0;
+  state.avRangedFireAttack = 0;
+  state.avRangedIceAttack = 0;
+  state.avRangedColdFireAttack = 0;
+  state.avSiegeAttack = 0;
+  state.avSiegeFireAttack = 0;
+  state.avSiegeIceAttack = 0;
+  state.avSiegeColdFireAttack = 0;
+
+  state.avBlock = 0;
+  state.avFireBlock = 0;
+  state.avIceBlock = 0;
+  state.avColdFireBlock = 0;
 }

@@ -26,7 +26,7 @@ void ACTranquility::playCardWeak(STATE *s){
 			break;
 		case 1:
 			if(!s->playerDeedDeck.isEmpty())
-				s->hand.push_back(s->playerDeedDeck.drawCard());
+				s->playerHand.push_back(s->playerDeedDeck.drawCard());
 			break;
 	}
 }
@@ -44,9 +44,9 @@ void ACTranquility::playCardStrong(STATE *s){
 			break;
 		case 1:
 			if(!s->playerDeedDeck.isEmpty())
-				s->hand.push_back(s->playerDeedDeck.drawCard());
+				s->playerHand.push_back(s->playerDeedDeck.drawCard());
 			if(!s->playerDeedDeck.isEmpty())
-				s->hand.push_back(s->playerDeedDeck.drawCard());
+				s->playerHand.push_back(s->playerDeedDeck.drawCard());
 			break;
 	}
 }

@@ -23,6 +23,7 @@ class Unit{
     int getChoices(){return playChoices;}
     int getLevel(){return level;}
     void setReady(bool rd){this->ready = rd;}
+    void setWounded(bool wd){this->wounded = wd;}
 
   protected:
     std::vector<LOCATION> recruitableLocations; //Locations in which this Unit can be recruited

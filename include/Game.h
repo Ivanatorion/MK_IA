@@ -12,13 +12,13 @@ class Game{
   public:
     Game(Player *player);
 
-    //The "step" function makes the game "state" transition based on input "action/actionParam".
+    //The "step" function makes the game "state" transition based on input "action/actionParam"
     void step(ACTION action, int actionParam);
 
-    //Runs the game main loop.
+    //Runs the game main loop
     void run();
 
-    //Prints information about the current state.
+    //Prints information about the current State
     void printState();
 
     std::string colorToString(COLOR c);
@@ -26,9 +26,12 @@ class Game{
   private:
     STATE state;
 
-    void reset();
+    void resetGame();
+    void resetRound();
 
     void shuffleUnits(); //Shuffle the Regular and Elite Units Deck
+
+    void clearStateAvs();
 
     void stepUseCardWeak(int actionParam);
     void stepUseCardStrong(int actionParam);
@@ -39,6 +42,22 @@ class Game{
     void stepMoveToHex(int actionParam);
     void stepRecruitUnit(int actionParam);
     void stepRevealTile(int actionParam);
+    void stepAttackRampagingEnemy(int actionParam);
+
+    void stepSelectEnemy(int actionParam);
+    void stepSelectAttackToAssign(int actionParam);
+    void stepAttackSelectedEnemies(int actionParam);
+    void stepBlockEnemy(int actionParam);
+    void stepAssingDamagePlayer(int actionParam);
+    void stepAssingDamageUnit(int actionParam);
+    void stepAdvanceBattlePhase(int actionParam);
+
+    void printStateBattle();
+    void printStateBattleRanged();
+    void printStateBattleBlock();
+    void printStateBattleAssing();
+    void printStateBattleAttack();
+    void printStateMoveExplore();
 
     void rollSourceDie(int dieN);
 };
