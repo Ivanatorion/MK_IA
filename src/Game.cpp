@@ -939,7 +939,7 @@ void Game::stepAssingDamageUnit(int actionParam){
   if(state.PlayerUnits[actionParam]->isWounded())
     return;
 
-  //Do something
+  //TODO: Do something
 
   state.BattleAttacksSelected.clear();
 }
@@ -1001,7 +1001,7 @@ void Game::stepAdvanceBattlePhase(int actionParam){
   }
 
   else if(state.gameScene == BATTLE_ASSIGN){
-    if(state.BattleAttacksToAssign.size() > 0)
+    if(state.BattleAttacksToAssign.size() > 0 || state.BattleAttacksSelected.size() > 0)
       return;
 
     state.gameScene = BATTLE_ATTACK;

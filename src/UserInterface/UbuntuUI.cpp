@@ -7,6 +7,32 @@ UbuntuUI::UbuntuUI(){
   printf("Running on Linux\n");
 }
 
+void UbuntuUI::printColored(std::string s, COLOR c){
+  switch(c){
+    case RED:
+      printf("\033[0;31m%s\033[0m", s.c_str());
+      break;
+    case GREEN:
+      printf("\033[0;32m%s\033[0m", s.c_str());
+      break;
+    case BLUE:
+      printf("\033[0;34m%s\033[0m", s.c_str());
+      break;
+    case WHITE:
+      printf("\033[1;37m%s\033[0m", s.c_str());
+      break;
+    case GOLD:
+      printf("\033[1;33m%s\033[0m", s.c_str());
+      break;
+    case BLACK:
+      printf("\033[1;30m%s\033[0m", s.c_str());
+      break;
+    default:
+      printf("%s", s.c_str());
+      break;
+  }
+}
+
 void UbuntuUI::printState(STATE state){
   if(!state.gameRunning){
     printf("\nGame is not running\n");
@@ -230,7 +256,7 @@ void UbuntuUI::printStateMoveExplore(STATE *s){
 
   printf("Source: ");
   for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    printf("%s ", colorToString(s->sourceDice[i]).c_str());
+    printColored(colorToString(s->sourceDice[i]) + " ", s->sourceDice[i]);
 
 
   //Attributes

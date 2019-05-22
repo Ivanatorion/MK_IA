@@ -15,6 +15,8 @@ class UbuntuUI : public UserInterface {
     void printStateBattleAssing(STATE *s);
     void printStateBattleAttack(STATE *s);
     void printStateMoveExplore(STATE *s);
+
+    void printColored(std::string s, COLOR c);
 };
 
 #endif
