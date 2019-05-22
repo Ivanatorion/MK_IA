@@ -50,29 +50,11 @@
 
 #include "../include/Cards/Wound.h"
 
-Game::Game(Player *player){
+Game::Game(Player *player, UserInterface *ui){
   this->state.player = player;
+  this->userinterface = ui;
   state.m = NULL;
   state.gameRunning = false;
-}
-
-std::string Game::colorToString(COLOR c){
-  switch (c) {
-    case RED:
-      return "Red";
-    case BLUE:
-      return "Blue";
-    case GREEN:
-      return "Green";
-    case WHITE:
-      return "White";
-    case GOLD:
-      return "Gold";
-    case BLACK:
-      return "Black";
-    default:
-      return "None";
-  }
 }
 
 //Advances the Game to the next Round
@@ -391,331 +373,12 @@ void Game::run(){
   state.gameRunning = true;
 
   while(!this->state.gameOver){
-      this->printState();
+      userinterface->printState(state);
       this->state.player->takeAction(state, &nextAction, &nextParam);
       this->step(nextAction, nextParam);
   }
 
   state.gameRunning = false;
-}
-
-//Prints information about the current State
-void Game::printState(){
-  if(!state.gameRunning){
-    printf("\nGame is not running\n");
-    return;
-  }
-
-  switch (state.gameScene) {
-    case MOVE_AND_EXPLORE:
-      printStateMoveExplore();
-      break;
-    case BATTLE_BLOCK:
-    case BATTLE_ATTACK:
-    case BATTLE_RANGED:
-    case BATTLE_ASSIGN:
-      printStateBattle();
-      break;
-  }
-}
-
-void Game::printStateBattle(){
-  printf("\n################################################################################\n");
-  printf("\nIn Battle Phase: ");
-  switch (state.gameScene) {
-    case BATTLE_RANGED:
-      printf("Ranged Attack");
-      break;
-    case BATTLE_BLOCK:
-      printf("Block");
-      break;
-    case BATTLE_ASSIGN:
-      printf("Assign Damage");
-      break;
-    case BATTLE_ATTACK:
-      printf("Attack");
-      break;
-  }
-
-  //Cards in Hand
-  printf("\n\nCards in hand: ");
-  if(state.playerHand.size() == 0)
-    printf("None");
-  else
-    for(int i = 0; i < state.playerHand.size(); i++)
-      printf("%s ", state.playerHand[i]->getName().c_str());
-  printf("\n\n");
-
-  printf("Cards in Deed Deck: %02d               Units:", state.playerDeedDeck.getSize());
-  for(int i = 0; i < state.PlayerUnits.size(); i++)
-    printf(" %s", state.PlayerUnits[i]->getName().c_str());
-
-  printf("\nCards in Discard Pile: %02d            Units in offer:", state.playerDiscardDeck.getSize());
-  for(int i = 0; i < state.UnitOffer.size(); i++)
-    printf(" %s", state.UnitOffer[i]->getName().c_str());
-
-  printf("\nSource: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    printf("%s ", colorToString(state.sourceDice[i]).c_str());
-
-    //Attributes
-  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\n", state.avAttack, state.avBlock, state.avMove, state.avInfluence);
-
-  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", state.playerCrystalsRed, state.playerCrystalsBlue, state.playerCrystalsGreen, state.playerCrystalsWhite);
-  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n\n", state.playerTokensRed, state.playerTokensBlue, state.playerTokensGreen, state.playerTokensWhite);
-
-  switch (state.gameScene) {
-    case BATTLE_RANGED:
-      printStateBattleRanged();
-      break;
-    case BATTLE_BLOCK:
-      printStateBattleBlock();
-      break;
-    case BATTLE_ASSIGN:
-      printStateBattleAssing();
-      break;
-    case BATTLE_ATTACK:
-      printStateBattleAttack();
-      break;
-  }
-
-  printf("\n\nSpecial:\n\n");
-
-  if(state.ManaDrawWeakActive)
-    printf("Can take extra dice (ManaDraw)\n");
-  if(state.ConcentrationNextCard)
-    printf("Next Strong Card is empowered (Concentration)\n");
-
-  printf("\n################################################################################\n");
-}
-
-void Game::printStateBattleRanged(){
-  printf("Enemies: {");
-  for(int i = 0; i < state.BattleEnemies.size(); i++){
-    printf("\n  %s", state.BattleEnemies[i].name.c_str());
-    printf("\n    %d Health", state.BattleEnemies[i].health);
-  }
-  printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
-    printf("%s", state.BattleEnemiesSelected[i].name.c_str());
-    if(i != state.BattleEnemiesSelected.size()-1)
-      printf(", ");
-  }
-  printf("}");
-}
-
-void Game::printStateBattleBlock(){
-  printf("Enemies: {");
-  for(int i = 0; i < state.BattleEnemies.size(); i++){
-    printf("\n  %s", state.BattleEnemies[i].name.c_str());
-    for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
-      if(state.BattleEnemies[i].attacks[j].blocked)
-        printf("\n    Blocked: ");
-      else
-        printf("\n    UnBlocked: ");
-      printf("%d ", state.BattleEnemies[i].attacks[j].attack);
-      switch (state.BattleEnemies[i].attacks[j].type) {
-        case PHYSICAL:
-          printf("Physical");
-          break;
-        case FIRE:
-          printf("Fire");
-          break;
-        case ICE:
-          printf("Ice");
-          break;
-        case COLDFIRE:
-          printf("ColdFire");
-          break;
-      }
-    }
-    printf("\n");
-  }
-  printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
-    printf("%s", state.BattleEnemiesSelected[i].name.c_str());
-    if(i != state.BattleEnemiesSelected.size()-1)
-      printf(", ");
-  }
-  printf("}");
-}
-
-void Game::printStateBattleAssing(){
-  printf("Attacks to Assign: ");
-  for(int i = 0; i < state.BattleAttacksToAssign.size(); i++){
-    if(i != 0)
-      printf(", ");
-    printf("%d ", state.BattleAttacksToAssign[i].attack);
-    switch (state.BattleAttacksToAssign[i].type) {
-      case PHYSICAL:
-        printf("Physical");
-        break;
-      case FIRE:
-        printf("Fire");
-        break;
-      case ICE:
-        printf("Ice");
-        break;
-      case COLDFIRE:
-        printf("ColdFire");
-        break;
-    }
-  }
-
-  printf("\n\nAttack Selected:");
-  for(int i = 0; i < state.BattleAttacksSelected.size(); i++){
-    printf(" %d ", state.BattleAttacksSelected[i].attack);
-    switch (state.BattleAttacksSelected[i].type) {
-      case PHYSICAL:
-        printf("Physical");
-        break;
-      case FIRE:
-        printf("Fire");
-        break;
-      case ICE:
-        printf("Ice");
-        break;
-      case COLDFIRE:
-        printf("ColdFire");
-        break;
-    }
-  }
-}
-
-void Game::printStateBattleAttack(){
-  printf("Enemies: {");
-  for(int i = 0; i < state.BattleEnemies.size(); i++){
-    printf("\n  %s", state.BattleEnemies[i].name.c_str());
-    printf("\n    %d Health", state.BattleEnemies[i].health);
-  }
-  printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
-    printf("%s", state.BattleEnemiesSelected[i].name.c_str());
-    if(i != state.BattleEnemiesSelected.size()-1)
-      printf(", ");
-  }
-  printf("}");
-}
-
-void Game::printStateMoveExplore(){
-  printf("\n################################################################################\n");
-  //Cards in Hand
-  printf("\nCards in hand: ");
-  if(state.playerHand.size() == 0)
-    printf("None");
-  else
-    for(int i = 0; i < state.playerHand.size(); i++)
-      printf("%s ", state.playerHand[i]->getName().c_str());
-  printf("\n\n");
-
-  printf("Cards in Deed Deck: %02d               Units:", state.playerDeedDeck.getSize());
-  for(int i = 0; i < state.PlayerUnits.size(); i++)
-    printf(" %s", state.PlayerUnits[i]->getName().c_str());
-
-  printf("\nCards in Discard Pile: %02d            Units in offer:", state.playerDiscardDeck.getSize());
-  for(int i = 0; i < state.UnitOffer.size(); i++)
-    printf(" %s", state.UnitOffer[i]->getName().c_str());
-
-  printf("\nCurrent Round: %d", state.currentRound);
-
-  //Fame
-  printf("\nFame: %d\nReputation: %d\n\n", state.playerFame, state.playerReputation);
-
-  printf("Source: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    printf("%s ", colorToString(state.sourceDice[i]).c_str());
-
-
-  //Attributes
-  printf("\n\nMove: %d\nInfluence: %d\nHeal: %d\n\n", state.avMove, state.avInfluence, state.avHeal);
-
-  //Location on map
-  printf("Current map tile: %d\n", state.curTileN);
-  printf("Current tile hex: %d\n", state.curHexN);
-  printf("Hex Terrain: ");
-  switch (state.curHex->terrain) {
-    case HILL:
-      printf("Hill");
-      break;
-    case PLAIN:
-      printf("Plain");
-      break;
-    case WASTELAND:
-      printf("Wasteland");
-      break;
-    case SWAMP:
-      printf("Swamp");
-      break;
-    case FOREST:
-      printf("Forest");
-      break;
-    case DESERT:
-      printf("Desert");
-      break;
-  }
-  printf("\nHex Location: ");
-  switch (state.curHex->location) {
-    case NONEL:
-      printf("None");
-      break;
-    case VILLAGE:
-      printf("Village");
-      break;
-    case GLADE:
-      printf("Glade");
-      break;
-    case TOWER:
-      printf("Tower");
-      break;
-    case KEEP:
-      printf("Keep");
-      break;
-    case MONASTERY:
-      printf("Monastery");
-      break;
-    case MINEG:
-      printf("Green Mine");
-      break;
-    case MINEB:
-      printf("Blue Mine");
-      break;
-    case MINER:
-      printf("Red Mine");
-      break;
-    case MINEW:
-      printf("White Mine");
-      break;
-    case ORC:
-      printf("Orc (This should not be happening btw)");
-      break;
-    default:
-      printf("Not defined");
-  }
-  printf("\n\n");
-
-  //Map status
-  printf("Map: [");
-  for(int i = 0; i < NUM_TILES-1; i++)
-    if((state.m->getTile(i).tileN) == -1)
-      printf("? ");
-    else
-      printf("%d ", (state.m->getTile(i).tileN));
-  if((state.m->getTile(NUM_TILES-1).tileN) == -1)
-    printf("?");
-  else
-    printf("%d", (state.m->getTile(NUM_TILES-1).tileN));
-  printf("]\n");
-
-  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", state.playerCrystalsRed, state.playerCrystalsBlue, state.playerCrystalsGreen, state.playerCrystalsWhite);
-  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", state.playerTokensRed, state.playerTokensBlue, state.playerTokensGreen, state.playerTokensWhite);
-  printf("\nSpecial:\n\n");
-
-  if(state.ManaDrawWeakActive)
-    printf("Can take extra dice (ManaDraw)\n");
-  if(state.ConcentrationNextCard)
-    printf("Next Strong Card is empowered (Concentration)\n");
-
-  printf("\n################################################################################\n");
 }
 
 void Game::stepUseCardWeak(int actionParam){
@@ -1307,13 +970,15 @@ void Game::stepAdvanceBattlePhase(int actionParam){
 
   if(state.gameScene == BATTLE_ATTACK){
     state.gameScene = MOVE_AND_EXPLORE;
-    if(state.BattleEnemies.size() == 0){
+    if(state.BattleEnemies.size() == 0 && state.BattleEnemiesSelected.size() == 0){
       if(state.rampagingHexAttacked != NULL){
         state.rampagingHexAttacked->location = NONEL;
         state.rampagingHexAttacked->faceUpEnemyToken.enemyType = NONEE;
         state.rampagingHexAttacked = NULL;
       }
     }
+    state.BattleEnemies.clear();
+    state.BattleEnemiesSelected.clear();
   }
 
   else if(state.gameScene == BATTLE_RANGED){

@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <utility>
 
 enum ATTACK_TYPE {PHYSICAL, ICE, FIRE, COLDFIRE, SUMMON};
 enum ENEMY_TYPE {E_ORC, E_DRAKE, E_DUNGEON, E_MAGE, E_KEEP, E_CITY, NONEE};

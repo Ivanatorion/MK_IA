@@ -7,10 +7,11 @@
 #include "Map.h"
 #include "defines.h"
 #include "Player/Player.h"
+#include "UserInterface/UserInterface.h"
 
 class Game{
   public:
-    Game(Player *player);
+    Game(Player *player, UserInterface *ui);
 
     //The "step" function makes the game "state" transition based on input "action/actionParam"
     void step(ACTION action, int actionParam);
@@ -18,13 +19,9 @@ class Game{
     //Runs the game main loop
     void run();
 
-    //Prints information about the current State
-    void printState();
-
-    std::string colorToString(COLOR c);
-
   private:
     STATE state;
+    UserInterface *userinterface;
 
     void resetGame();
     void resetRound();
@@ -51,13 +48,6 @@ class Game{
     void stepAssingDamagePlayer(int actionParam);
     void stepAssingDamageUnit(int actionParam);
     void stepAdvanceBattlePhase(int actionParam);
-
-    void printStateBattle();
-    void printStateBattleRanged();
-    void printStateBattleBlock();
-    void printStateBattleAssing();
-    void printStateBattleAttack();
-    void printStateMoveExplore();
 
     void rollSourceDie(int dieN);
 };

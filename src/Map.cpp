@@ -187,13 +187,23 @@ Map::Map(){
     tiles[i].hexes[6]->neighboors[2] = tiles[i].hexes[5];
   }
 
-  for(int i = 0; i < NUM_TOTAL_TILES; i++){
+  for(int i = 0; i < NUM_TOTAL_TILES; i++)
     tiles[i].tileN = i;
+  for(int i = 0; i < NUM_TILES; i++)
     tilesRevealed[i] = false;
-  }
+    
   tilesRevealed[0] = true;
 
   tiles[0].hexes[0]->neighboors[2] = &outsideOfMap;
+  tiles[0].hexes[2]->neighboors[0] = &outsideOfMap;
+  tiles[0].hexes[2]->neighboors[2] = &outsideOfMap;
+  tiles[0].hexes[2]->neighboors[4] = &outsideOfMap;
+  tiles[0].hexes[5]->neighboors[2] = &outsideOfMap;
+  tiles[0].hexes[5]->neighboors[4] = &outsideOfMap;
+  tiles[0].hexes[5]->neighboors[5] = &outsideOfMap;
+  tiles[0].hexes[6]->neighboors[3] = &outsideOfMap;
+  tiles[0].hexes[6]->neighboors[4] = &outsideOfMap;
+  tiles[0].hexes[6]->neighboors[5] = &outsideOfMap;
 
   this->initTileStack();
 
@@ -448,6 +458,7 @@ bool Map::revealTile(int tilePos){
       tiles[tilePos].hexes[i]->faceUpEnemyToken = this->getEnemy(E_DRAKE);
   }
 
+  //TODO: Adjust outsideOfMap
   //Adjusts neighboors
   static const short int refTable[NUM_TILES][6] = {{ 2, 1,-1,-1,-1,-1},
                                                    { 4, 3,-1,-1, 0, 2},
