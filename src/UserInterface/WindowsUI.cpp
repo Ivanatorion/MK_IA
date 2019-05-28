@@ -2,9 +2,37 @@
 #include "../../include/UserInterface/WindowsUI.h"
 
 #include <cstdio>
+#include <windows.h>
 
 WindowsUI::WindowsUI(){
   printf("Running on Windows\n");
+}
+
+void WindowsUI::textcolor(COLOR c){
+  switch (c) {
+    case RED:
+      textcolor(TRED);
+      break;
+    case BLUE:
+      textcolor(TINDIGO);
+      break;
+    case GREEN:
+      textcolor(TGREEN);
+      break;
+    case WHITE:
+      textcolor(TWHITE);
+      break;
+    case GOLD:
+      textcolor(TYELLOW);
+      break;
+    case BLACK:
+      textcolor(TGREY);
+      break;
+  }
+}
+
+void WindowsUI::textcolor(TextColor x){
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),x);
 }
 
 void WindowsUI::printState(STATE state){
@@ -229,9 +257,11 @@ void WindowsUI::printStateMoveExplore(STATE *s){
   printf("\nFame: %d\nReputation: %d\n\n", s->playerFame, s->playerReputation);
 
   printf("Source: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
+  for(int i = 0; i < N_DICE_IN_SOURCE; i++){
+    textcolor(s->sourceDice[i]);
     printf("%s ", colorToString(s->sourceDice[i]).c_str());
-
+  }
+  textcolor(TGREY);
 
   //Attributes
   printf("\n\nMove: %d\nInfluence: %d\nHeal: %d\n\n", s->avMove, s->avInfluence, s->avHeal);
@@ -313,8 +343,27 @@ void WindowsUI::printStateMoveExplore(STATE *s){
     printf("%d", (s->m->getTile(NUM_TILES-1).tileN));
   printf("]\n");
 
-  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", s->playerCrystalsRed, s->playerCrystalsBlue, s->playerCrystalsGreen, s->playerCrystalsWhite);
-  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", s->playerTokensRed, s->playerTokensBlue, s->playerTokensGreen, s->playerTokensWhite);
+  printf("\nCrystals: ");
+  textcolor(TRED);
+  printf("%d ", s->playerCrystalsRed);
+  textcolor(TINDIGO);
+  printf("%d ", s->playerCrystalsBlue);
+  textcolor(TGREEN);
+  printf("%d ", s->playerCrystalsGreen);
+  textcolor(TWHITE);
+  printf("%d ", s->playerCrystalsWhite);
+  textcolor(TGREY);
+  printf("\nTokens:   ");
+  textcolor(TRED);
+  printf("%d ", s->playerTokensRed);
+  textcolor(TINDIGO);
+  printf("%d ", s->playerTokensBlue);
+  textcolor(TGREEN);
+  printf("%d ", s->playerTokensGreen);
+  textcolor(TWHITE);
+  printf("%d ", s->playerTokensWhite);
+  textcolor(TGREY);
+
   printf("\nSpecial:\n\n");
 
   if(s->ManaDrawWeakActive)

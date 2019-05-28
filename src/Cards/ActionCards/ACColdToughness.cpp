@@ -24,7 +24,7 @@ void ACColdToughness::playCardWeak(STATE *s){
       s->avAttack = s->avAttack + 2;
       break;
     case 1:
-      s->avBlock = s->avIceBlock + 3;
+      s->avIceBlock = s->avIceBlock + 3;
       break;
   }
 }

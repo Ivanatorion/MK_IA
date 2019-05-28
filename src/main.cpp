@@ -16,6 +16,7 @@ int main(int argc, char* argv[]){
   Player *player = new HumanPlayer();
   UserInterface *ui;
 
+  //Changes UI based on target system
   #ifdef _WIN32
     ui = new WindowsUI();
   #elif __linux__

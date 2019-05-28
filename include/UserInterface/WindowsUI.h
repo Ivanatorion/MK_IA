@@ -4,6 +4,8 @@
 
 #include "UserInterface.h"
 
+enum TextColor {TGREY = 7, TBLACK, TBLUE, TGREEN, TINDIGO, TRED, TPULPLE, TYELLOW, TWHITE};
+
 class WindowsUI : public UserInterface {
   public:
     WindowsUI();
@@ -15,6 +17,9 @@ class WindowsUI : public UserInterface {
     void printStateBattleAssing(STATE *s);
     void printStateBattleAttack(STATE *s);
     void printStateMoveExplore(STATE *s);
+
+    void textcolor(COLOR c);
+    void textcolor(TextColor t);
 };
 
 #endif
