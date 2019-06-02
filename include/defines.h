@@ -11,14 +11,16 @@
 
 enum COLOR {RED, GREEN, BLUE, WHITE, GOLD, BLACK, NONE}; //NONE for Artifacts
 enum CARDTYPE {ACTIONCARD, SPELLCARD, ARTIFACTCARD, WOUND};
-enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, USE_CARD_SIDEWAYS, USE_UNIT, MOVE_TO_ADJACENT_HEX,
+enum ACTION {NOTHING, USE_CARD_WEAK, USE_CARD_STRONG, USE_CARD_SIDEWAYS, USE_UNIT, USE_SKILL, MOVE_TO_ADJACENT_HEX,
              TAKE_DIE_FROM_SOURCE, RECRUIT_UNIT, REVEAL_ADJEACENT_TILE, ATTACK_RAMPAGING_ENEMY,
              SELECT_ENEMY, ATTACK_SELECTED_ENEMIES, BLOCK_ENEMY, ADVANCE_BATTLE_PHASE,
-             SELECT_ATTACK_TO_ASSING, ASSING_DAMAGE_TO_UNIT, ASSING_DAMAGE_TO_PLAYER, END_TURN, QUIT_GAME};
+             SELECT_ATTACK_TO_ASSING, ASSING_DAMAGE_TO_UNIT, ASSING_DAMAGE_TO_PLAYER, END_TURN, QUIT_GAME,
+             HEAL_PLAYER_WOUND};
 enum GAME_SCENE {MOVE_AND_EXPLORE, BATTLE_RANGED, BATTLE_BLOCK, BATTLE_ASSIGN, BATTLE_ATTACK};
 
 class Player;
 class Unit;
+class Skill;
 typedef struct stado{
   bool gameRunning;        //Game is running.
   bool gameOver;           //Game should end.
@@ -40,6 +42,10 @@ typedef struct stado{
   std::vector<Unit*> RegularUnitsDeck;
   std::vector<Unit*> EliteUnitsDeck;
 
+  //Skills
+  std::vector<Skill*> SkillsNotObtained;
+  std::vector<Skill*> SkillsObtained;
+
   std::vector<Card*> playerHand;   //Cards in the player hand.
   int playerHandMaxSize;           //Maximum cards the player can hold.
   int currentRound;                //Current game round.
@@ -49,6 +55,9 @@ typedef struct stado{
   int curTileN;                    //curTileN = number of the tile (in map position)
   int curHexN;                     //Number of the Hex in the tile
   int playerArmor;
+  int playerLevel;
+  int playerCommandTokens;
+
   HEX *curHex;
 
   Map *m; //The map.

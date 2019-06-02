@@ -27,13 +27,20 @@ class Game{
     void resetRound();
 
     void shuffleUnits(); //Shuffle the Regular and Elite Units Deck
+    void shuffleSkills(); //Shuffle the Skills
 
     void clearStateAvs();
 
+    void checkLevelUp();
+    void gainSkill();
+    void gainAdvancedAction();
+
+    void stepHealPlayer(int actionParam);
     void stepUseCardWeak(int actionParam);
     void stepUseCardStrong(int actionParam);
     void stepUseCardSideways(int actionParam);
     void stepUseUnit(int actionParam);
+    void stepUseSkill(int actionParam);
     void stepTakeDieFromSource(int actionParam);
     void stepEndTurn(int actionParam);
     void stepMoveToHex(int actionParam);

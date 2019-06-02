@@ -54,6 +54,9 @@ void HumanPlayer::takeActionBattleAssign(STATE state, ACTION *rAction, int *rPar
     case 5:
       (*rAction) = QUIT_GAME;
       break;
+    default:
+      (*rAction) = NOTHING;
+      break;
   }
 
   printf("\nType the parameter: ");
@@ -66,8 +69,8 @@ void HumanPlayer::takeActionBattle(STATE state, ACTION *rAction, int *rParam){
 
   printf("Choose Action: \n\n");
   printf("00) Nothing                     07) Advance Battle Phase\n");
-  printf("01) Use Card Weak               08) Quit Game\n");
-  printf("02) Use Card Strong\n");
+  printf("01) Use Card Weak               08) Use Skill\n");
+  printf("02) Use Card Strong             09) Quit Game\n");
   printf("03) Use Card Sideways\n");
   printf("04) Take Die From Source\n");
   printf("05) Select Enemy\n");
@@ -104,6 +107,9 @@ void HumanPlayer::takeActionBattle(STATE state, ACTION *rAction, int *rParam){
       (*rAction) = ADVANCE_BATTLE_PHASE;
       break;
     case 8:
+      (*rAction) = USE_SKILL;
+      break;
+    case 9:
       (*rAction) = QUIT_GAME;
       break;
   }
@@ -120,10 +126,10 @@ void HumanPlayer::takeActionMoveExplore(STATE state, ACTION *rAction, int *rPara
   printf("00) Nothing                  07) Reveal Adjacent Tile\n");
   printf("01) Use Card Weak            08) Use Card Sideways\n");
   printf("02) Use Card Strong          09) Use Unit\n");
-  printf("03) Take Die From Source     10) Attack Rampaging Enemy\n");
-  printf("04) Move to Adjacent Hex     11) Quit Game\n");
-  printf("05) End Turn\n");
-  printf("06) Recruit Unit\n");
+  printf("03) Take Die From Source     10) Use Skill\n");
+  printf("04) Move to Adjacent Hex     11) Attack Rampaging Enemy\n");
+  printf("05) End Turn                 12) Heal Player Wound\n");
+  printf("06) Recruit Unit             13) Quit Game\n");
 
   scanf("%d", &act);
 
@@ -159,9 +165,15 @@ void HumanPlayer::takeActionMoveExplore(STATE state, ACTION *rAction, int *rPara
       (*rAction) = USE_UNIT;
       break;
     case 10:
-      (*rAction) = ATTACK_RAMPAGING_ENEMY;
+      (*rAction) = USE_SKILL;
       break;
     case 11:
+      (*rAction) = ATTACK_RAMPAGING_ENEMY;
+      break;
+    case 12:
+      (*rAction) = HEAL_PLAYER_WOUND;
+      break;
+    case 13:
       (*rAction) = QUIT_GAME;
       break;
   }

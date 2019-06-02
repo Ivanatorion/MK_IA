@@ -1,5 +1,7 @@
 #include "../../include/Cards/Deck.h"
 
+#include "../../include/Cards/Card.h"
+
 #include <cstdlib>
 #include <vector>
 
@@ -17,6 +19,17 @@ Card* Deck::drawCard(){
   deck.erase(deck.end() - 1);
 
   return rCard;
+}
+
+bool Deck::removeWound(){
+  for(int i = 0; i < deck.size(); i++){
+    if(deck[i]->getCardType() == WOUND){
+      delete deck[i];
+      deck.erase(deck.begin() + i);
+      return true;
+    }
+  }
+  return false;
 }
 
 bool Deck::isEmpty(){

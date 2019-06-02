@@ -14,6 +14,7 @@ class Deck{
     void shuffle();                 //Shuffles the Deck
     void clear();                   //Clears the Deck
     int getSize();                  //Returns the ammount of cards in the Deck
+    bool removeWound();             //Returns true if Removed a Wound
 
   private:
     std::vector<Card*> deck;

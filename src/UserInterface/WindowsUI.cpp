@@ -8,6 +8,110 @@ WindowsUI::WindowsUI(){
   printf("Running on Windows\n");
 }
 
+void WindowsUI::printCrystals(STATE *s){
+  printf("Crystals: ");
+  textcolor(TRED);
+  printf("%d ", s->playerCrystalsRed);
+  textcolor(TINDIGO);
+  printf("%d ", s->playerCrystalsBlue);
+  textcolor(TGREEN);
+  printf("%d ", s->playerCrystalsGreen);
+  textcolor(TWHITE);
+  printf("%d ", s->playerCrystalsWhite);
+  textcolor(TGREY);
+  printf("\nTokens:   ");
+  textcolor(TRED);
+  printf("%d ", s->playerTokensRed);
+  textcolor(TINDIGO);
+  printf("%d ", s->playerTokensBlue);
+  textcolor(TGREEN);
+  printf("%d ", s->playerTokensGreen);
+  textcolor(TWHITE);
+  printf("%d \n", s->playerTokensWhite);
+  textcolor(TGREY);
+}
+
+void WindowsUI::printSpecial(STATE *s){
+  printf("Special:\n\n");
+
+  if(s->ManaDrawWeakActive)
+    printf("Can take extra dice (ManaDraw)\n");
+  if(s->ConcentrationNextCard)
+    printf("Next Strong Card is empowered (Concentration)\n");
+}
+
+void WindowsUI::printPlayerHand(STATE *s){
+  printf("Cards in hand: ");
+  if(s->playerHand.size() == 0)
+    printf("None");
+  else
+    for(int i = 0; i < s->playerHand.size(); i++){
+      textcolor(s->playerHand[i]->getColor());
+      printf("%s ", s->playerHand[i]->getName().c_str());
+    }
+  textcolor(TGREY);
+}
+
+void WindowsUI::printSource(STATE *s){
+  printf("Source: ");
+  for(int i = 0; i < N_DICE_IN_SOURCE; i++){
+    textcolor(s->sourceDice[i]);
+    printf("%s ", colorToString(s->sourceDice[i]).c_str());
+  }
+  textcolor(TGREY);
+}
+
+void WindowsUI::printSkills(STATE *s){
+  printf("Skills: ");
+  for(int i = 0; i < s->SkillsObtained.size(); i++){
+    textcolor((s->SkillsObtained[i]->isOnCooldown()) ? TRED : TINDIGO);
+    printf("%s ", s->SkillsObtained[i]->getName().c_str());
+  }
+  textcolor(TGREY);
+}
+
+void WindowsUI::printEnemiesSelection(STATE *s){
+  bool fResS = false, iResS = false, pResS = false;
+  int totalHealth = 0;
+
+  printf("Enemies:");
+  for(int i = 0; i < s->BattleEnemies.size(); i++){
+    printf("\n  %s:", s->BattleEnemies[i].name.c_str());
+    printf("\n    %d Health", s->BattleEnemies[i].health);
+    if(s->BattleEnemies[i].fortified){
+      textcolor(TRED);
+      printf(" (Fortified)");
+      textcolor(TGREY);
+    }
+    if(s->BattleEnemies[i].arcaneImune){
+      textcolor(TPURPLE);
+      printf(" (Arcane Imune)");
+      textcolor(TGREY);
+    }
+  }
+  printf("\n\nEnemies Selected: {");
+  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
+    printf("%s", s->BattleEnemiesSelected[i].name.c_str());
+    if(i != s->BattleEnemiesSelected.size()-1)
+      printf(", ");
+  }
+  printf("}\nEnemies Selected Resistances: ");
+  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
+    if(s->BattleEnemiesSelected[i].pRes)
+      pResS = true;
+    if(s->BattleEnemiesSelected[i].fRes)
+      fResS = true;
+    if(s->BattleEnemiesSelected[i].iRes)
+      iResS = true;
+    totalHealth = totalHealth + s->BattleEnemiesSelected[i].health;
+  }
+  if(pResS) printf(" Physical");
+  if(fResS) printf(" Fire");
+  if(iResS) printf(" Ice");
+  if(fResS && iResS) printf(" ColdFire");
+  printf("\nTotal Health: %d\n", totalHealth);
+}
+
 void WindowsUI::textcolor(COLOR c){
   switch (c) {
     case RED:
@@ -26,6 +130,7 @@ void WindowsUI::textcolor(COLOR c){
       textcolor(TYELLOW);
       break;
     case BLACK:
+    case NONE:
       textcolor(TGREY);
       break;
   }
@@ -41,6 +146,8 @@ void WindowsUI::printState(STATE state){
     return;
   }
 
+  printf("\n################################################################################\n");
+
   switch (state.gameScene) {
     case MOVE_AND_EXPLORE:
       printStateMoveExplore(&state);
@@ -52,195 +159,15 @@ void WindowsUI::printState(STATE state){
       printStateBattle(&state);
       break;
   }
-}
-
-void WindowsUI::printStateBattle(STATE *s){
-  printf("\n################################################################################\n");
-  printf("\nIn Battle Phase: ");
-  switch (s->gameScene) {
-    case BATTLE_RANGED:
-      printf("Ranged Attack");
-      break;
-    case BATTLE_BLOCK:
-      printf("Block");
-      break;
-    case BATTLE_ASSIGN:
-      printf("Assign Damage");
-      break;
-    case BATTLE_ATTACK:
-      printf("Attack");
-      break;
-  }
-
-  //Cards in Hand
-  printf("\n\nCards in hand: ");
-  if(s->playerHand.size() == 0)
-    printf("None");
-  else
-    for(int i = 0; i < s->playerHand.size(); i++)
-      printf("%s ", s->playerHand[i]->getName().c_str());
-  printf("\n\n");
-
-  printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
-  for(int i = 0; i < s->PlayerUnits.size(); i++)
-    printf(" %s", s->PlayerUnits[i]->getName().c_str());
-
-  printf("\nCards in Discard Pile: %02d            Units in offer:", s->playerDiscardDeck.getSize());
-  for(int i = 0; i < s->UnitOffer.size(); i++)
-    printf(" %s", s->UnitOffer[i]->getName().c_str());
-
-  printf("\nSource: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    printf("%s ", colorToString(s->sourceDice[i]).c_str());
-
-    //Attributes
-  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\n", s->avAttack, s->avBlock, s->avMove, s->avInfluence);
-
-  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", s->playerCrystalsRed, s->playerCrystalsBlue, s->playerCrystalsGreen, s->playerCrystalsWhite);
-  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n\n", s->playerTokensRed, s->playerTokensBlue, s->playerTokensGreen, s->playerTokensWhite);
-
-  switch (s->gameScene) {
-    case BATTLE_RANGED:
-      printStateBattleRanged(s);
-      break;
-    case BATTLE_BLOCK:
-      printStateBattleBlock(s);
-      break;
-    case BATTLE_ASSIGN:
-      printStateBattleAssing(s);
-      break;
-    case BATTLE_ATTACK:
-      printStateBattleAttack(s);
-      break;
-  }
-
-  printf("\n\nSpecial:\n\n");
-
-  if(s->ManaDrawWeakActive)
-    printf("Can take extra dice (ManaDraw)\n");
-  if(s->ConcentrationNextCard)
-    printf("Next Strong Card is empowered (Concentration)\n");
 
   printf("\n################################################################################\n");
-}
-
-void WindowsUI::printStateBattleRanged(STATE *s){
-  printf("Enemies: {");
-  for(int i = 0; i < s->BattleEnemies.size(); i++){
-    printf("\n  %s", s->BattleEnemies[i].name.c_str());
-    printf("\n    %d Health", s->BattleEnemies[i].health);
-  }
-  printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
-    printf("%s", s->BattleEnemiesSelected[i].name.c_str());
-    if(i != s->BattleEnemiesSelected.size()-1)
-      printf(", ");
-  }
-  printf("}");
-}
-
-void WindowsUI::printStateBattleBlock(STATE *s){
-  printf("Enemies: {");
-  for(int i = 0; i < s->BattleEnemies.size(); i++){
-    printf("\n  %s", s->BattleEnemies[i].name.c_str());
-    for(int j = 0; j < s->BattleEnemies[i].attacks.size(); j++){
-      if(s->BattleEnemies[i].attacks[j].blocked)
-        printf("\n    Blocked: ");
-      else
-        printf("\n    UnBlocked: ");
-      printf("%d ", s->BattleEnemies[i].attacks[j].attack);
-      switch (s->BattleEnemies[i].attacks[j].type) {
-        case PHYSICAL:
-          printf("Physical");
-          break;
-        case FIRE:
-          printf("Fire");
-          break;
-        case ICE:
-          printf("Ice");
-          break;
-        case COLDFIRE:
-          printf("ColdFire");
-          break;
-      }
-    }
-    printf("\n");
-  }
-  printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
-    printf("%s", s->BattleEnemiesSelected[i].name.c_str());
-    if(i != s->BattleEnemiesSelected.size()-1)
-      printf(", ");
-  }
-  printf("}");
-}
-
-void WindowsUI::printStateBattleAssing(STATE *s){
-  printf("Attacks to Assign: ");
-  for(int i = 0; i < s->BattleAttacksToAssign.size(); i++){
-    if(i != 0)
-      printf(", ");
-    printf("%d ", s->BattleAttacksToAssign[i].attack);
-    switch (s->BattleAttacksToAssign[i].type) {
-      case PHYSICAL:
-        printf("Physical");
-        break;
-      case FIRE:
-        printf("Fire");
-        break;
-      case ICE:
-        printf("Ice");
-        break;
-      case COLDFIRE:
-        printf("ColdFire");
-        break;
-    }
-  }
-
-  printf("\n\nAttack Selected:");
-  for(int i = 0; i < s->BattleAttacksSelected.size(); i++){
-    printf(" %d ", s->BattleAttacksSelected[i].attack);
-    switch (s->BattleAttacksSelected[i].type) {
-      case PHYSICAL:
-        printf("Physical");
-        break;
-      case FIRE:
-        printf("Fire");
-        break;
-      case ICE:
-        printf("Ice");
-        break;
-      case COLDFIRE:
-        printf("ColdFire");
-        break;
-    }
-  }
-}
-
-void WindowsUI::printStateBattleAttack(STATE *s){
-  printf("Enemies: {");
-  for(int i = 0; i < s->BattleEnemies.size(); i++){
-    printf("\n  %s", s->BattleEnemies[i].name.c_str());
-    printf("\n    %d Health", s->BattleEnemies[i].health);
-  }
-  printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
-    printf("%s", s->BattleEnemiesSelected[i].name.c_str());
-    if(i != s->BattleEnemiesSelected.size()-1)
-      printf(", ");
-  }
-  printf("}");
 }
 
 void WindowsUI::printStateMoveExplore(STATE *s){
-  printf("\n################################################################################\n");
+
   //Cards in Hand
-  printf("\nCards in hand: ");
-  if(s->playerHand.size() == 0)
-    printf("None");
-  else
-    for(int i = 0; i < s->playerHand.size(); i++)
-      printf("%s ", s->playerHand[i]->getName().c_str());
+  printf("\n");
+  printPlayerHand(s);
   printf("\n\n");
 
   printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
@@ -255,13 +182,10 @@ void WindowsUI::printStateMoveExplore(STATE *s){
 
   //Fame
   printf("\nFame: %d\nReputation: %d\n\n", s->playerFame, s->playerReputation);
+  printSkills(s);
+  printf("\n\n");
 
-  printf("Source: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++){
-    textcolor(s->sourceDice[i]);
-    printf("%s ", colorToString(s->sourceDice[i]).c_str());
-  }
-  textcolor(TGREY);
+  printSource(s);
 
   //Attributes
   printf("\n\nMove: %d\nInfluence: %d\nHeal: %d\n\n", s->avMove, s->avInfluence, s->avHeal);
@@ -341,37 +265,163 @@ void WindowsUI::printStateMoveExplore(STATE *s){
     printf("?");
   else
     printf("%d", (s->m->getTile(NUM_TILES-1).tileN));
-  printf("]\n");
+  printf("]\n\n");
 
-  printf("\nCrystals: ");
-  textcolor(TRED);
-  printf("%d ", s->playerCrystalsRed);
-  textcolor(TINDIGO);
-  printf("%d ", s->playerCrystalsBlue);
-  textcolor(TGREEN);
-  printf("%d ", s->playerCrystalsGreen);
-  textcolor(TWHITE);
-  printf("%d ", s->playerCrystalsWhite);
-  textcolor(TGREY);
-  printf("\nTokens:   ");
-  textcolor(TRED);
-  printf("%d ", s->playerTokensRed);
-  textcolor(TINDIGO);
-  printf("%d ", s->playerTokensBlue);
-  textcolor(TGREEN);
-  printf("%d ", s->playerTokensGreen);
-  textcolor(TWHITE);
-  printf("%d ", s->playerTokensWhite);
-  textcolor(TGREY);
+  printCrystals(s);
 
-  printf("\nSpecial:\n\n");
+  printf("\n");
 
-  if(s->ManaDrawWeakActive)
-    printf("Can take extra dice (ManaDraw)\n");
-  if(s->ConcentrationNextCard)
-    printf("Next Strong Card is empowered (Concentration)\n");
+  printSpecial(s);
 
-  printf("\n################################################################################\n");
+}
+
+void WindowsUI::printStateBattle(STATE *s){
+
+  printf("\nIn Battle Phase: ");
+  switch (s->gameScene) {
+    case BATTLE_RANGED:
+      printf("Ranged Attack\n");
+      break;
+    case BATTLE_BLOCK:
+      printf("Block\n");
+      break;
+    case BATTLE_ASSIGN:
+      printf("Assign Damage\n");
+      break;
+    case BATTLE_ATTACK:
+      printf("Attack\n");
+      break;
+  }
+
+  printf("\n");
+  printPlayerHand(s);
+  printf("\n\n");
+
+  printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
+  for(int i = 0; i < s->PlayerUnits.size(); i++)
+    printf(" %s", s->PlayerUnits[i]->getName().c_str());
+
+  printf("\nCards in Discard Pile: %02d            Units in offer:", s->playerDiscardDeck.getSize());
+  for(int i = 0; i < s->UnitOffer.size(); i++)
+    printf(" %s", s->UnitOffer[i]->getName().c_str());
+
+  printf("\n\n");
+  printSkills(s);
+
+  printf("\n\n");
+  printSource(s);
+
+    //Attributes
+  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\n\n", s->avAttack, s->avBlock, s->avMove, s->avInfluence);
+
+  printCrystals(s);
+
+  printf("\n");
+
+  switch (s->gameScene) {
+    case BATTLE_RANGED:
+      printStateBattleRanged(s);
+      break;
+    case BATTLE_BLOCK:
+      printStateBattleBlock(s);
+      break;
+    case BATTLE_ASSIGN:
+      printStateBattleAssing(s);
+      break;
+    case BATTLE_ATTACK:
+      printStateBattleAttack(s);
+      break;
+  }
+
+  printf("\n");
+  printSpecial(s);
+}
+
+void WindowsUI::printStateBattleRanged(STATE *s){
+  printEnemiesSelection(s);
+}
+
+void WindowsUI::printStateBattleBlock(STATE *s){
+  printf("Enemies: {");
+  for(int i = 0; i < s->BattleEnemies.size(); i++){
+    printf("\n  %s", s->BattleEnemies[i].name.c_str());
+    for(int j = 0; j < s->BattleEnemies[i].attacks.size(); j++){
+      if(s->BattleEnemies[i].attacks[j].blocked)
+        printf("\n    Blocked: ");
+      else
+        printf("\n    UnBlocked: ");
+      printf("%d ", s->BattleEnemies[i].attacks[j].attack);
+      switch (s->BattleEnemies[i].attacks[j].type) {
+        case PHYSICAL:
+          printf("Physical");
+          break;
+        case FIRE:
+          printf("Fire");
+          break;
+        case ICE:
+          printf("Ice");
+          break;
+        case COLDFIRE:
+          printf("ColdFire");
+          break;
+      }
+    }
+    printf("\n");
+  }
+  printf("\n}\n\nEnemies Selected: {");
+  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
+    printf("%s", s->BattleEnemiesSelected[i].name.c_str());
+    if(i != s->BattleEnemiesSelected.size()-1)
+      printf(", ");
+  }
+  printf("}");
+}
+
+void WindowsUI::printStateBattleAssing(STATE *s){
+  printf("Attacks to Assign: ");
+  for(int i = 0; i < s->BattleAttacksToAssign.size(); i++){
+    if(i != 0)
+      printf(", ");
+    printf("%d ", s->BattleAttacksToAssign[i].attack);
+    switch (s->BattleAttacksToAssign[i].type) {
+      case PHYSICAL:
+        printf("Physical");
+        break;
+      case FIRE:
+        printf("Fire");
+        break;
+      case ICE:
+        printf("Ice");
+        break;
+      case COLDFIRE:
+        printf("ColdFire");
+        break;
+    }
+  }
+
+  printf("\n\nAttack Selected:");
+  for(int i = 0; i < s->BattleAttacksSelected.size(); i++){
+    printf(" %d ", s->BattleAttacksSelected[i].attack);
+    switch (s->BattleAttacksSelected[i].type) {
+      case PHYSICAL:
+        printf("Physical");
+        break;
+      case FIRE:
+        printf("Fire");
+        break;
+      case ICE:
+        printf("Ice");
+        break;
+      case COLDFIRE:
+        printf("ColdFire");
+        break;
+    }
+  }
+  printf("\n");
+}
+
+void WindowsUI::printStateBattleAttack(STATE *s){
+  printEnemiesSelection(s);
 }
 
 #endif

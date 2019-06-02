@@ -50,6 +50,17 @@
 
 #include "../include/Cards/Wound.h"
 
+#include "../include/Skills/Tovak/ColdSwordsmanship.h"
+#include "../include/Skills/Tovak/DoubleTime.h"
+#include "../include/Skills/Tovak/IDontGiveADamn.h"
+#include "../include/Skills/Tovak/IFeelNoPain.h"
+#include "../include/Skills/Tovak/ManaOverload.h"
+#include "../include/Skills/Tovak/NightSharpshooting.h"
+#include "../include/Skills/Tovak/ResistanceBreak.h"
+#include "../include/Skills/Tovak/ShieldMastery.h"
+#include "../include/Skills/Tovak/TvkMotivation.h"
+#include "../include/Skills/Tovak/WhoNeedsMagic.h"
+
 Game::Game(Player *player, UserInterface *ui){
   this->state.player = player;
   this->userinterface = ui;
@@ -115,6 +126,8 @@ void Game::resetGame(){
   state.playerReputation = 0;
   state.playerHandMaxSize = 5;
   state.playerArmor = 2;
+  state.playerLevel = 1;
+  state.playerCommandTokens = 1;
 
   state.avHeal = 0;
   state.curTileN = 0;
@@ -126,6 +139,22 @@ void Game::resetGame(){
   state.avInfluence = 0;
 
   clearStateAvs();
+
+  //Skills
+  state.SkillsObtained.clear();
+  state.SkillsNotObtained.clear();
+
+  state.SkillsNotObtained.push_back(new ColdSwordsmanship());
+  state.SkillsNotObtained.push_back(new DoubleTime());
+  state.SkillsNotObtained.push_back(new IDontGiveADamn());
+  state.SkillsNotObtained.push_back(new IFeelNoPain());
+  state.SkillsNotObtained.push_back(new ManaOverload());
+  state.SkillsNotObtained.push_back(new NightSharpshooting());
+  state.SkillsNotObtained.push_back(new ResistanceBreak());
+  state.SkillsNotObtained.push_back(new ShieldMastery());
+  state.SkillsNotObtained.push_back(new TvkMotivation());
+  state.SkillsNotObtained.push_back(new WhoNeedsMagic());
+  this->shuffleSkills();
 
   state.BattleEnemies.clear();
   state.BattleEnemiesSelected.clear();
@@ -260,6 +289,21 @@ void Game::shuffleUnits(){
   }
 }
 
+//Shuffle the Skills
+void Game::shuffleSkills(){
+  const int swaps = 500;
+  int p1, p2;
+  Skill* aux;
+
+  for(int i = 0; i < swaps; i++){
+      p1 = rand()%(state.SkillsNotObtained.size());
+      p2 = rand()%(state.SkillsNotObtained.size());
+      aux = state.SkillsNotObtained[p1];
+      state.SkillsNotObtained[p1] = state.SkillsNotObtained[p2];
+      state.SkillsNotObtained[p2] = aux;
+  }
+}
+
 //Rolls a die in the Source
 void Game::rollSourceDie(int dieN){
   switch (rand()%6) {
@@ -357,6 +401,12 @@ void Game::step(ACTION action, int actionParam){
       break;
     case USE_UNIT:
       stepUseUnit(actionParam);
+      break;
+    case USE_SKILL:
+      stepUseSkill(actionParam);
+      break;
+    case HEAL_PLAYER_WOUND:
+      stepHealPlayer(actionParam);
       break;
     case QUIT_GAME:
       state.gameOver = true;
@@ -606,6 +656,16 @@ void Game::stepUseUnit(int actionParam){
   }
 }
 
+void Game::stepUseSkill(int actionParam){
+  if(actionParam < 0 || actionParam >= state.SkillsObtained.size())
+    return;
+
+  if(!state.SkillsObtained[actionParam]->isOnCooldown()){
+    state.SkillsObtained[actionParam]->onPlayed(&state);
+    state.SkillsObtained[actionParam]->setOnCooldown(true);
+  }
+}
+
 void Game::stepMoveToHex(int actionParam){
   if(actionParam < 0 || actionParam > 6)
     return;
@@ -755,25 +815,7 @@ void Game::stepEndTurn(int actionParam){
   state.playerTokensWhite = 0;
   state.playerTokensBlack = 0;
 
-  state.avAttack = 0;
-  state.avMove = 0;
-  state.avBlock = 0;
-  state.avInfluence = 0;
-  state.avRangedAttack = 0;
-  state.avRangedIceAttack = 0;
-  state.avRangedFireAttack = 0;
-  state.avRangedColdFireAttack = 0;
-  state.avSiegeAttack = 0;
-  state.avSiegeIceAttack = 0;
-  state.avSiegeFireAttack = 0;
-  state.avSiegeColdFireAttack = 0;
-  state.avColdFireAttack = 0;
-  state.avColdFireBlock = 0;
-  state.avFireAttack = 0;
-  state.avFireBlock = 0;
-  state.avIceAttack = 0;
-  state.avIceBlock = 0;
-  state.avHeal = 0;
+  clearStateAvs();
 
   state.playerFame = state.playerFame + state.fameToGain;
   state.playerReputation = state.playerReputation + state.repToGain;
@@ -781,12 +823,96 @@ void Game::stepEndTurn(int actionParam){
   state.fameToGain = 0;
   state.repToGain = 0;
 
+  checkLevelUp();
+
   for(int i = 0; i < N_DICE_IN_SOURCE; i++)
     if(state.sourceDice[i] == NONE)
       rollSourceDie(i);
 
   state.ManaDrawWeakActive = false;
   state.ConcentrationNextCard = false;
+
+  //Refresh Skills
+  for(int i = 0; i < state.SkillsObtained.size(); i++)
+    if(state.SkillsObtained[i]->getCooldown() == ONCE_A_TURN)
+      state.SkillsObtained[i]->setOnCooldown(false);
+}
+
+void Game::stepHealPlayer(int actionParam){
+  if(state.gameScene == BATTLE_RANGED || state.gameScene == BATTLE_BLOCK || state.gameScene == BATTLE_ASSIGN || state.gameScene == BATTLE_ATTACK)
+    return;
+
+  if(state.avHeal == 0)
+    return;
+
+  for(int i = 0; i < state.playerHand.size(); i++){
+    if(state.playerHand[i]->getCardType() == WOUND){
+      delete state.playerHand[i];
+      state.playerHand.erase(state.playerHand.begin() + i);
+      state.avHeal--;
+      return;
+    }
+  }
+
+  if(state.playerDiscardDeck.removeWound()){
+    state.avHeal--;
+    return;
+  }
+}
+
+void Game::checkLevelUp(){
+  static const int maxFameOnLevel[9] = {2, 7, 14, 23, 34, 47, 62, 79, 98};
+  static const int playerArmorOnLevel[10] = {2, 2, 3, 3, 3, 3, 4, 4, 4, 4};
+  static const int playerHandSizeOnLevel[10] = {5, 5, 5, 5, 6, 6, 6, 6, 7, 7};
+  bool levelUp = false;
+
+  for(int i = 0; i < 9; i++){
+    if(state.playerFame > maxFameOnLevel[i] && state.playerLevel < i + 2)
+      levelUp = true;
+  }
+
+  if(levelUp){
+    state.playerLevel++;
+    if(state.playerLevel%2 == 1){
+      state.playerCommandTokens++;
+      state.playerArmor = playerArmorOnLevel[state.playerLevel - 1];
+      state.playerHandMaxSize = playerHandSizeOnLevel[state.playerLevel - 1];
+    }
+    else{
+      gainSkill();
+      gainAdvancedAction();
+    }
+    checkLevelUp(); //Could have Leveled Up twice
+  }
+}
+
+void Game::gainSkill(){
+  Skill *s1, *s2;
+
+  s1 = state.SkillsNotObtained[0];
+  s2 = state.SkillsNotObtained[1];
+
+  state.SkillsNotObtained.erase(state.SkillsNotObtained.begin());
+  state.SkillsNotObtained.erase(state.SkillsNotObtained.begin());
+
+  std::vector<std::string> choices;
+  choices.push_back(s1->getName());
+  choices.push_back(s2->getName());
+
+  int choice = state.player->chooseOption(choices);
+
+  if(choice == 0) {
+    state.SkillsObtained.push_back(s1);
+    delete s2;
+  }
+  if(choice == 1){
+    state.SkillsObtained.push_back(s2);
+    delete s1;
+  }
+}
+
+void Game::gainAdvancedAction(){
+
 }
 
 void Game::stepAttackRampagingEnemy(int actionParam){
@@ -1026,4 +1152,5 @@ void Game::clearStateAvs(){
   state.avFireBlock = 0;
   state.avIceBlock = 0;
   state.avColdFireBlock = 0;
+  state.avHeal = 0;
 }

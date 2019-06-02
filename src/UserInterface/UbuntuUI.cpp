@@ -7,6 +7,48 @@ UbuntuUI::UbuntuUI(){
   printf("Running on Linux\n");
 }
 
+void UbuntuUI::printPlayerHand(STATE *s){
+  printf("Cards in hand: ");
+  if(s->playerHand.size() == 0)
+    printColored("None", RED);
+  else
+    for(int i = 0; i < s->playerHand.size(); i++){
+      if(s->playerHand[i]->getCardType() == WOUND)
+        printColored("Wound", BLACK);
+      else
+        printColored(s->playerHand[i]->getName() + " ", s->playerHand[i]->getColor());
+    }
+}
+
+void UbuntuUI::printPlayerMana(STATE *s){
+  char quant[10];
+  printf("Crystals: ");
+  sprintf(quant, "%d ", s->playerCrystalsRed);
+  printColored(quant, RED);
+  sprintf(quant, "%d ", s->playerCrystalsBlue);
+  printColored(quant, BLUE);
+  sprintf(quant, "%d ", s->playerCrystalsGreen);
+  printColored(quant, GREEN);
+  sprintf(quant, "%d ", s->playerCrystalsWhite);
+  printColored(quant, WHITE);
+
+  printf("\nTokens:   ");
+  sprintf(quant, "%d ", s->playerTokensRed);
+  printColored(quant, RED);
+  sprintf(quant, "%d ", s->playerTokensBlue);
+  printColored(quant, BLUE);
+  sprintf(quant, "%d ", s->playerTokensGreen);
+  printColored(quant, GREEN);
+  sprintf(quant, "%d ", s->playerTokensWhite);
+  printColored(quant, WHITE);
+}
+
+void UbuntuUI::printSource(STATE *s){
+  printf("Source: ");
+  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
+    printColored(colorToString(s->sourceDice[i]) + " ", s->sourceDice[i]);
+}
+
 void UbuntuUI::printColored(std::string s, COLOR c){
   switch(c){
     case RED:
@@ -70,13 +112,8 @@ void UbuntuUI::printStateBattle(STATE *s){
       break;
   }
 
-  //Cards in Hand
-  printf("\n\nCards in hand: ");
-  if(s->playerHand.size() == 0)
-    printf("None");
-  else
-    for(int i = 0; i < s->playerHand.size(); i++)
-      printf("%s ", s->playerHand[i]->getName().c_str());
+  printf("\n\n");
+  printPlayerHand(s);
   printf("\n\n");
 
   printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
@@ -87,15 +124,14 @@ void UbuntuUI::printStateBattle(STATE *s){
   for(int i = 0; i < s->UnitOffer.size(); i++)
     printf(" %s", s->UnitOffer[i]->getName().c_str());
 
-  printf("\nSource: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    printf("%s ", colorToString(s->sourceDice[i]).c_str());
+  printSource(s);
 
     //Attributes
-  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d\n", s->avAttack, s->avBlock, s->avMove, s->avInfluence);
+  printf("\n\nAttack: %d\nBlock: %d\nMove: %d\nInfluence: %d", s->avAttack, s->avBlock, s->avMove, s->avInfluence);
 
-  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", s->playerCrystalsRed, s->playerCrystalsBlue, s->playerCrystalsGreen, s->playerCrystalsWhite);
-  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n\n", s->playerTokensRed, s->playerTokensBlue, s->playerTokensGreen, s->playerTokensWhite);
+  printf("\n\n");
+  printPlayerMana(s);
+  printf("\n\n");
 
   switch (s->gameScene) {
     case BATTLE_RANGED:
@@ -232,13 +268,9 @@ void UbuntuUI::printStateBattleAttack(STATE *s){
 
 void UbuntuUI::printStateMoveExplore(STATE *s){
   printf("\n################################################################################\n");
-  //Cards in Hand
-  printf("\nCards in hand: ");
-  if(s->playerHand.size() == 0)
-    printf("None");
-  else
-    for(int i = 0; i < s->playerHand.size(); i++)
-      printf("%s ", s->playerHand[i]->getName().c_str());
+
+  printf("\n\n");
+  printPlayerHand(s);
   printf("\n\n");
 
   printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
@@ -254,10 +286,7 @@ void UbuntuUI::printStateMoveExplore(STATE *s){
   //Fame
   printf("\nFame: %d\nReputation: %d\n\n", s->playerFame, s->playerReputation);
 
-  printf("Source: ");
-  for(int i = 0; i < N_DICE_IN_SOURCE; i++)
-    printColored(colorToString(s->sourceDice[i]) + " ", s->sourceDice[i]);
-
+  printSource(s);
 
   //Attributes
   printf("\n\nMove: %d\nInfluence: %d\nHeal: %d\n\n", s->avMove, s->avInfluence, s->avHeal);
@@ -339,8 +368,8 @@ void UbuntuUI::printStateMoveExplore(STATE *s){
     printf("%d", (s->m->getTile(NUM_TILES-1).tileN));
   printf("]\n");
 
-  printf("\nCrystals:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", s->playerCrystalsRed, s->playerCrystalsBlue, s->playerCrystalsGreen, s->playerCrystalsWhite);
-  printf("\nTokens:\nRed: %d\nBlue: %d\nGreen: %d\nWhite: %d\n", s->playerTokensRed, s->playerTokensBlue, s->playerTokensGreen, s->playerTokensWhite);
+  printPlayerMana(s);
+
   printf("\nSpecial:\n\n");
 
   if(s->ManaDrawWeakActive)

@@ -4,13 +4,21 @@
 
 #include "UserInterface.h"
 
-enum TextColor {TGREY = 7, TBLACK, TBLUE, TGREEN, TINDIGO, TRED, TPULPLE, TYELLOW, TWHITE};
+enum TextColor {TGREY = 7, TBLACK, TBLUE, TGREEN, TINDIGO, TRED, TPURPLE, TYELLOW, TWHITE};
 
 class WindowsUI : public UserInterface {
   public:
     WindowsUI();
     void printState(STATE state);
   private:
+    void printCrystals(STATE *s);
+    void printSpecial(STATE *s);
+    void printPlayerHand(STATE *s);
+    void printSource(STATE *s);
+    void printSkills(STATE *s);
+
+    void printEnemiesSelection(STATE *s);
+
     void printStateBattle(STATE *s);
     void printStateBattleRanged(STATE *s);
     void printStateBattleBlock(STATE *s);
