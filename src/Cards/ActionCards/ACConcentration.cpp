@@ -7,6 +7,7 @@ ACConcentration::ACConcentration(){
   this->cardtype = ACTIONCARD;
   this->choicesWeak = 1;
 	this->choicesStrong = 0;
+  this->basic = true;
 }
 
 std::string ACConcentration::getName(){

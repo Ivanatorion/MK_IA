@@ -12,7 +12,7 @@ void ResistanceBreak::onPlayed(STATE *s){
     return;
 
   std::vector<std::string> choices;
-	for(int i = 0; i < s->BattleEnemies.size(); i++)
+  for(int i = 0; i < s->BattleEnemies.size(); i++)
     choices.push_back(s->BattleEnemies[i].name);
   for(int i = 0; i < s->BattleEnemiesSelected.size(); i++)
     choices.push_back(s->BattleEnemiesSelected[i].name);

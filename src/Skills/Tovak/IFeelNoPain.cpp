@@ -15,7 +15,7 @@ void IFeelNoPain::onPlayed(STATE *s){
 
   for(int i = 0; i < s->playerHand.size(); i++){
     if(s->playerHand[i]->getCardType() == WOUND){
-      delete s->playerHand[i];
+      s->playerDiscardDeck.addCardTop(s->playerHand[i]);
       s->playerHand[i] = s->playerDeedDeck.drawCard();
       return;
     }

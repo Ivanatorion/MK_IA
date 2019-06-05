@@ -14,10 +14,12 @@ class Card{
     CARDTYPE getCardType(){return cardtype;}
     int getChoicesWeak(){return choicesWeak;}
     int getChoicesStrong(){return choicesStrong;}
+    bool isBasic(){return basic;}
 
   protected:
     COLOR color;
     CARDTYPE cardtype;
+    bool basic;
     int choicesWeak, choicesStrong;             //How many choices the Player has to make when using the effect.
 };
 

@@ -38,6 +38,8 @@ void WindowsUI::printSpecial(STATE *s){
     printf("Can take extra dice (ManaDraw)\n");
   if(s->ConcentrationNextCard)
     printf("Next Strong Card is empowered (Concentration)\n");
+  if(s->TovakIDontGiveADamn)
+    printf("Next Sideways Card Gives 2/3 of choosen attribute (Tovak IDGAD)\n");
 }
 
 void WindowsUI::printPlayerHand(STATE *s){

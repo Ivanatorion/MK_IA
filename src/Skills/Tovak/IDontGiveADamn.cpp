@@ -8,5 +8,5 @@ IDontGiveADamn::IDontGiveADamn(){
 }
 
 void IDontGiveADamn::onPlayed(STATE *s){
-  
+  s->TovakIDontGiveADamn = true;
 }

@@ -5,6 +5,7 @@ ACSwiftness::ACSwiftness(){
   this->cardtype = ACTIONCARD;
   this->choicesWeak = 0;
   this->choicesStrong = 0;
+  this->basic = true;
 }
 
 std::string ACSwiftness::getName(){

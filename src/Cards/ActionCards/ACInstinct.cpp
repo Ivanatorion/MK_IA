@@ -7,6 +7,7 @@ ACInstinct::ACInstinct(){
 	this->cardtype = ACTIONCARD;
 	this->choicesWeak = 1;
   this->choicesStrong = 1;
+	this->basic = true;
 }
 
 std::string ACInstinct::getName(){

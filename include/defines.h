@@ -87,9 +87,10 @@ typedef struct stado{
 
   Player *player;
 
-  //Card vars
+  //Special effects
   bool ManaDrawWeakActive;
   bool ConcentrationNextCard;
+  bool TovakIDontGiveADamn;
 
   //End Turn
   int fameToGain;

@@ -30,8 +30,11 @@ class Game{
     void shuffleSkills(); //Shuffle the Skills
 
     void clearStateAvs();
+    void clearSpecialEffects();
 
     void checkLevelUp();
+    void checkEndedOnMine();
+
     void gainSkill();
     void gainAdvancedAction();
 

@@ -19,6 +19,7 @@ class UbuntuUI : public UserInterface {
     void printPlayerHand(STATE *s);
     void printPlayerMana(STATE *s);
     void printSource(STATE *s);
+    void printSpecial(STATE *s);
 
     void printColored(std::string s, COLOR c);
 };

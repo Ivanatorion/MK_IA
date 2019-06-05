@@ -5,6 +5,7 @@ ACThreaten::ACThreaten(){
 	this->cardtype = ACTIONCARD;
 	this->choicesWeak = 0;
   this->choicesStrong = 0;
+	this->basic = true;
 }
 
 std::string ACThreaten::getName(){

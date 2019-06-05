@@ -49,6 +49,17 @@ void UbuntuUI::printSource(STATE *s){
     printColored(colorToString(s->sourceDice[i]) + " ", s->sourceDice[i]);
 }
 
+void UbuntuUI::printSpecial(STATE *s){
+  printf("Special:\n\n");
+
+  if(s->ManaDrawWeakActive)
+    printf("Can take extra dice (ManaDraw)\n");
+  if(s->ConcentrationNextCard)
+    printf("Next Strong Card is empowered (Concentration)\n");
+  if(s->TovakIDontGiveADamn)
+    printf("Next Sideways Card Gives 2/3 of choosen attribute (Tovak IDGAD)\n");
+}
+
 void UbuntuUI::printColored(std::string s, COLOR c){
   switch(c){
     case RED:
@@ -81,6 +92,8 @@ void UbuntuUI::printState(STATE state){
     return;
   }
 
+  printf("\n################################################################################\n");
+
   switch (state.gameScene) {
     case MOVE_AND_EXPLORE:
       printStateMoveExplore(&state);
@@ -92,10 +105,11 @@ void UbuntuUI::printState(STATE state){
       printStateBattle(&state);
       break;
   }
+
+  printf("\n################################################################################\n");
 }
 
 void UbuntuUI::printStateBattle(STATE *s){
-  printf("\n################################################################################\n");
   printf("\nIn Battle Phase: ");
   switch (s->gameScene) {
     case BATTLE_RANGED:
@@ -148,14 +162,9 @@ void UbuntuUI::printStateBattle(STATE *s){
       break;
   }
 
-  printf("\n\nSpecial:\n\n");
+  printf("\n\n");
 
-  if(s->ManaDrawWeakActive)
-    printf("Can take extra dice (ManaDraw)\n");
-  if(s->ConcentrationNextCard)
-    printf("Next Strong Card is empowered (Concentration)\n");
-
-  printf("\n################################################################################\n");
+  printSpecial(s);
 }
 
 void UbuntuUI::printStateBattleRanged(STATE *s){
@@ -267,9 +276,7 @@ void UbuntuUI::printStateBattleAttack(STATE *s){
 }
 
 void UbuntuUI::printStateMoveExplore(STATE *s){
-  printf("\n################################################################################\n");
-
-  printf("\n\n");
+  printf("\n");
   printPlayerHand(s);
   printf("\n\n");
 
@@ -370,14 +377,9 @@ void UbuntuUI::printStateMoveExplore(STATE *s){
 
   printPlayerMana(s);
 
-  printf("\nSpecial:\n\n");
+  printf("\n");
 
-  if(s->ManaDrawWeakActive)
-    printf("Can take extra dice (ManaDraw)\n");
-  if(s->ConcentrationNextCard)
-    printf("Next Strong Card is empowered (Concentration)\n");
-
-  printf("\n################################################################################\n");
+  printSpecial(s);
 }
 
 #endif
