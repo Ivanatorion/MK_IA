@@ -23,7 +23,7 @@ void ACTranquility::playCardWeak(STATE *s){
 
 	switch (c) {
 		case 0:
-			s->avHeal = s->avHeal + 1;
+			givePlayerHeal(s, 1);
 			break;
 		case 1:
 			if(!s->playerDeedDeck.isEmpty())
@@ -41,7 +41,7 @@ void ACTranquility::playCardStrong(STATE *s){
 
 	switch (c) {
 		case 0:
-			s->avHeal = s->avHeal + 2;
+			givePlayerHeal(s, 2);
 			break;
 		case 1:
 			if(!s->playerDeedDeck.isEmpty())

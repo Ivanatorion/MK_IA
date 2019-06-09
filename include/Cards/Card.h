@@ -21,6 +21,12 @@ class Card{
     CARDTYPE cardtype;
     bool basic;
     int choicesWeak, choicesStrong;             //How many choices the Player has to make when using the effect.
+
+    void givePlayerMove(STATE *s, int moveAmmount);
+    void givePlayerAttack(STATE *s, int attackAmmount);
+    void givePlayerInfluence(STATE *s, int influenceAmmount);
+    void givePlayerBlock(STATE *s, int blockAmmount);
+    void givePlayerHeal(STATE *s, int healAmmount);
 };
 
 #endif

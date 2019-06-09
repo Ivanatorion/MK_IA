@@ -22,17 +22,14 @@ void ACDetermination::playCardWeak(STATE *s){
 
   switch (choice) {
     case 0:
-      s->avAttack = s->avAttack + 2;
+      givePlayerAttack(s, 2);
       break;
     case 1:
-      s->avBlock = s->avBlock + 2;
+      givePlayerBlock(s, 2);
       break;
   }
 }
 
 void ACDetermination::playCardStrong(STATE *s){
-  s->avBlock = s->avBlock + 5;
-
-  if(s->ConcentrationNextCard)
-    s->avBlock = s->avBlock + 2;
+  givePlayerBlock(s, s->ConcentrationNextCard ? 7 : 5);
 }

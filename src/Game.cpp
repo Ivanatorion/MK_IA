@@ -35,7 +35,7 @@
 #include "../include/Units/UUtemGuardsmen.h"
 #include "../include/Units/UUtemSwordsmen.h"
 
-//Action Cards
+//Basic Action Cards
 #include "../include/Cards/ActionCards/ACCrystallize.h"
 #include "../include/Cards/ActionCards/ACInstinct.h"
 #include "../include/Cards/ActionCards/ACColdToughness.h"
@@ -49,6 +49,16 @@
 #include "../include/Cards/ActionCards/ACSwiftness.h"
 #include "../include/Cards/ActionCards/ACThreaten.h"
 #include "../include/Cards/ActionCards/ACTranquility.h"
+
+//Advanced Action cards
+#include "../include/Cards/ActionCards/Advanced/ACFireBolt.h"
+#include "../include/Cards/ActionCards/Advanced/ACIceBolt.h"
+#include "../include/Cards/ActionCards/Advanced/ACSwiftBolt.h"
+#include "../include/Cards/ActionCards/Advanced/ACCrushingBolt.h"
+#include "../include/Cards/ActionCards/Advanced/ACBloodRage.h"
+#include "../include/Cards/ActionCards/Advanced/ACIceShield.h"
+#include "../include/Cards/ActionCards/Advanced/ACAgility.h"
+#include "../include/Cards/ActionCards/Advanced/ACRefreshingWalk.h"
 
 #include "../include/Cards/Wound.h"
 
@@ -107,6 +117,15 @@ void Game::resetRound(){
     }
   }
 
+  //Refresh the Advanced Action Offer
+  if(state.advancedActionsOffer[2] != NULL){
+    delete state.advancedActionsOffer[2];
+    state.advancedActionsOffer[2] = NULL;
+  }
+  state.advancedActionsOffer[2] = state.advancedActionsOffer[1];
+  state.advancedActionsOffer[1] = state.advancedActionsOffer[0];
+  state.advancedActionsOffer[0] = state.advancedActionsDeck.drawCard();
+
   //Shuffles the Player Deed Deck and draw up to its hand maximum size.
   while(!state.playerDiscardDeck.isEmpty())
     state.playerDeedDeck.addCardTop(state.playerDiscardDeck.drawCard());
@@ -126,6 +145,8 @@ void Game::resetGame(){
   state.m->revealTile(2);
 
   state.rampagingHexAttacked = NULL;
+  state.assaultingSite = false;
+  state.spellsToGain = 0;
 
   state.currentRound = 0;
 
@@ -133,10 +154,11 @@ void Game::resetGame(){
   state.playerFame = 0;
   state.playerReputation = 0;
   state.playerHandMaxSize = 5;
+  state.playerHandSizeBonus = 0;
   state.playerArmor = 2;
   state.playerLevel = 1;
   state.playerCommandTokens = 1;
-
+  state.playerKeepsConquered = 0;
 
   state.curTileN = 0;
   state.curHexN = 3;
@@ -144,6 +166,32 @@ void Game::resetGame(){
   state.curHex = state.m->getTile(0).hexes[3];
 
   clearStateAvs();
+
+  //Decks and Offers
+  state.advancedActionsOffer[0] = NULL;
+  state.advancedActionsOffer[1] = NULL;
+  state.advancedActionsOffer[2] = NULL;
+  state.spellOffer[0] = NULL;
+  state.spellOffer[1] = NULL;
+  state.spellOffer[2] = NULL;
+
+  state.advancedActionsDeck.clear();
+  state.artifactsDeck.clear();
+  state.spellsDeck.clear();
+
+  state.advancedActionsDeck.addCardTop(new ACFireBolt());
+  state.advancedActionsDeck.addCardTop(new ACIceBolt());
+  state.advancedActionsDeck.addCardTop(new ACSwiftBolt());
+  state.advancedActionsDeck.addCardTop(new ACCrushingBolt());
+  state.advancedActionsDeck.addCardTop(new ACBloodRage());
+  state.advancedActionsDeck.addCardTop(new ACIceShield());
+  state.advancedActionsDeck.addCardTop(new ACAgility());
+  state.advancedActionsDeck.addCardTop(new ACRefreshingWalk());
+  state.advancedActionsDeck.shuffle();
+
+  state.advancedActionsOffer[2] = state.advancedActionsDeck.drawCard();
+  state.advancedActionsOffer[1] = state.advancedActionsDeck.drawCard();
+  state.advancedActionsOffer[0] = state.advancedActionsDeck.drawCard();
 
   //Skills
   state.SkillsObtained.clear();
@@ -173,9 +221,6 @@ void Game::resetGame(){
 
   state.playerDiscardDeck.clear();
   state.playerDeedDeck.clear();
-  state.advancedActionsDeck.clear();
-  state.artifactsDeck.clear();
-  state.spellsDeck.clear();
 
   //Mana Tokens and Crystals
   state.playerTokensRed = 0;
@@ -672,6 +717,17 @@ void Game::stepUseCardSideways(int actionParam){
       break;
     case 2:
       state.avMove = state.avMove + statusAmmount;
+
+      if(state.gameScene == BATTLE_RANGED && state.AgilityStrong){
+    		state.avRangedAttack = state.avRangedAttack + state.avMove/2;
+    		state.avMove = state.avMove%2;
+    	}
+
+    	if(state.gameScene == BATTLE_ATTACK && (state.AgilityWeak || state.AgilityStrong)){
+    		state.avAttack = state.avAttack + state.avMove/2;
+    		state.avMove = state.avMove%2;
+    	}
+
       break;
     case 3:
       state.avInfluence = state.avInfluence + statusAmmount;
@@ -743,6 +799,59 @@ void Game::stepMoveToHex(int actionParam){
 
       state.curTileN = refTableTile[state.curTileN][state.curHexN][actionParam];
       state.curHexN = refTableHex[state.curHexN][actionParam];
+
+      //Check if revealed garisons
+      if(state.isDayNight){
+        for(int i = 0; i < 6; i++){
+          if(state.curHex->neighboors[i] != NULL){
+            if(state.curHex->neighboors[i]->faceDownEnemyToken != NONEE){
+              state.curHex->neighboors[i]->faceUpEnemyToken = state.m->getEnemy(state.curHex->neighboors[i]->faceDownEnemyToken);
+              state.curHex->neighboors[i]->faceDownEnemyToken = NONEE;
+            }
+          }
+        }
+      }
+
+      //Check if assaulting
+      if((state.curHex->location == KEEP || state.curHex->location == TOWER) && (state.curHex->faceUpEnemyToken.enemyType != NONEE || state.curHex->faceDownEnemyToken != NONEE)){
+        if(state.playerReputation > -7) state.playerReputation--;
+
+        state.gameScene = BATTLE_RANGED;
+        state.rampagingHexAttacked = NULL;
+        state.assaultingSite = true;
+        if(state.curHex->faceDownEnemyToken != NONEE){
+          state.curHex->faceUpEnemyToken = state.m->getEnemy(state.curHex->faceDownEnemyToken);
+          state.curHex->faceDownEnemyToken = NONEE;
+        }
+        state.BattleEnemies.push_back(state.curHex->faceUpEnemyToken);
+        for(int i = 0; i < state.BattleEnemies.size(); i++){
+          state.BattleEnemies[i].blocked = false;
+
+          //Give enemies Fortification
+          if(state.BattleEnemies[i].fortified)
+            state.BattleEnemies[i].doubleFortified = true;
+          else
+            state.BattleEnemies[i].fortified = true;
+
+          for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+            state.BattleEnemies[i].attacks[j].blocked = false;
+          }
+        }
+      }
+
+      //Check if adjacent to conquered Keep
+      bool hasBonus = false;
+      if(state.curHex->location == KEEP && state.curHex->hasShieldToken){
+        state.playerHandSizeBonus = state.playerKeepsConquered;
+        hasBonus = true;
+      }
+      for(int i = 0; i < 6; i++)
+        if(state.curHex->neighboors[i]->location == KEEP && state.curHex->neighboors[i]->hasShieldToken){
+          state.playerHandSizeBonus = state.playerKeepsConquered;
+          hasBonus = true;
+        }
+      if(!hasBonus)
+        state.playerHandSizeBonus = 0;
     }
   }
 }
@@ -847,7 +956,7 @@ void Game::stepEndTurn(int actionParam){
   state.gameScene = MOVE_AND_EXPLORE;
 
   //Draw Cards
-  while(state.playerHand.size() < state.playerHandMaxSize && !state.playerDeedDeck.isEmpty())
+  while(state.playerHand.size() < state.playerHandMaxSize + state.playerHandSizeBonus && !state.playerDeedDeck.isEmpty())
     state.playerHand.push_back(state.playerDeedDeck.drawCard());
 
   //Clear all Mana Tokens
@@ -870,6 +979,12 @@ void Game::stepEndTurn(int actionParam){
 
   //Verifies if a Level Up occured
   checkLevelUp();
+
+  //Gain Spells
+  while(state.spellsToGain > 0){
+    gainSpell();
+    state.spellsToGain--;
+  }
 
   //Re-roll the dice in the Source
   for(int i = 0; i < N_DICE_IN_SOURCE; i++)
@@ -983,35 +1098,6 @@ void Game::checkLevelUp(){
     }
     checkLevelUp(); //Could have Leveled Up twice
   }
-}
-
-void Game::gainSkill(){
-  Skill *s1, *s2;
-
-  s1 = state.SkillsNotObtained[0];
-  s2 = state.SkillsNotObtained[1];
-
-  state.SkillsNotObtained.erase(state.SkillsNotObtained.begin());
-  state.SkillsNotObtained.erase(state.SkillsNotObtained.begin());
-
-  std::vector<std::string> choices;
-  choices.push_back(s1->getName());
-  choices.push_back(s2->getName());
-
-  int choice = state.player->chooseOption(choices);
-
-  if(choice == 0) {
-    state.SkillsObtained.push_back(s1);
-    delete s2;
-  }
-  if(choice == 1){
-    state.SkillsObtained.push_back(s2);
-    delete s1;
-  }
-}
-
-void Game::gainAdvancedAction(){
-
 }
 
 void Game::stepAttackRampagingEnemy(int actionParam){
@@ -1139,8 +1225,15 @@ void Game::stepBlockEnemy(int actionParam){
   totalBlock = totalBlock + state.avColdFireBlock;
 
   if(totalBlock >= at.attack){
-    printf("%d >= %d\n", totalBlock, at.attack);
     state.BattleEnemiesSelected[0].attacks[actionParam].blocked = true;
+
+    //Ice Shield Strong Effect
+    if(state.IceShieldStrong){
+      state.IceShieldStrong = false;
+      state.BattleEnemiesSelected[0].health = state.BattleEnemiesSelected[0].health - 3;
+      if(state.BattleEnemiesSelected[0].health < 1)
+        state.BattleEnemiesSelected[0].health = 1;
+    }
 
     //Check if all attacks of this enemy were blocked
     state.BattleEnemiesSelected[0].blocked = true;
@@ -1195,12 +1288,32 @@ void Game::stepAdvanceBattlePhase(int actionParam){
 
   if(state.gameScene == BATTLE_ATTACK){
     state.gameScene = MOVE_AND_EXPLORE;
+
+    state.AgilityStrong = false;
+    state.AgilityWeak = false;
+
     if(state.BattleEnemies.size() == 0 && state.BattleEnemiesSelected.size() == 0){
+      //Remove Token from map
       if(state.rampagingHexAttacked != NULL){
         state.rampagingHexAttacked->location = NONEL;
         state.rampagingHexAttacked->faceUpEnemyToken.enemyType = NONEE;
         state.rampagingHexAttacked = NULL;
       }
+      if(state.assaultingSite){
+        state.assaultingSite = false;
+        state.curHex->faceUpEnemyToken.enemyType = NONEE;
+        state.curHex->faceUpEnemyToken2.enemyType = NONEE;
+        this->onConquerSite();
+      }
+
+    }
+    else{
+      if(state.assaultingSite){
+        state.assaultingSite = false;
+        state.curHex->faceUpEnemyToken2 = state.curHex->faceUpEnemyToken;
+        state.curHex->faceUpEnemyToken.enemyType = NONEE;
+      }
+      //TODO: Forced Retreat
     }
     state.BattleEnemies.clear();
     state.BattleEnemiesSelected.clear();
@@ -1223,6 +1336,7 @@ void Game::stepAdvanceBattlePhase(int actionParam){
     }
 
     state.gameScene = BATTLE_ASSIGN;
+    state.IceShieldStrong = false;
   }
 
   else if(state.gameScene == BATTLE_ASSIGN){
@@ -1260,4 +1374,52 @@ void Game::clearSpecialEffects(){
   state.ManaDrawWeakActive = false;
   state.ConcentrationNextCard = false;
   state.TovakIDontGiveADamn = false;
+  state.IceShieldStrong = false;
+  state.AgilityStrong = false;
+  state.AgilityWeak = false;
+}
+
+void Game::gainSkill(){
+  Skill *s1, *s2;
+
+  s1 = state.SkillsNotObtained[0];
+  s2 = state.SkillsNotObtained[1];
+
+  state.SkillsNotObtained.erase(state.SkillsNotObtained.begin());
+  state.SkillsNotObtained.erase(state.SkillsNotObtained.begin());
+
+  std::vector<std::string> choices;
+  choices.push_back(s1->getName());
+  choices.push_back(s2->getName());
+
+  int choice = state.player->chooseOption(choices);
+
+  if(choice == 0) {
+    state.SkillsObtained.push_back(s1);
+    delete s2;
+  }
+  if(choice == 1){
+    state.SkillsObtained.push_back(s2);
+    delete s1;
+  }
+}
+
+void Game::gainAdvancedAction(){
+
+}
+
+void Game::gainSpell(){
+
+}
+
+void Game::onConquerSite(){
+  state.curHex->hasShieldToken = true;
+
+  if(state.curHex->location == TOWER)
+    state.spellsToGain++;
+
+  if(state.curHex->location == KEEP){
+    state.playerKeepsConquered++;
+    state.playerHandSizeBonus = state.playerKeepsConquered;
+  }
 }

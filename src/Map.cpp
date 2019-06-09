@@ -23,6 +23,7 @@ Map::Map(){
       tiles[i].hexes[j]->faceUpEnemyToken.enemyType = NONEE;
       tiles[i].hexes[j]->faceUpEnemyToken2.enemyType = NONEE;
       tiles[i].hexes[j]->faceDownEnemyToken = NONEE;
+      tiles[i].hexes[j]->hasShieldToken = false;
 
       //Gets the terrain type of current hex.
       switch(fgetc(fp)){
@@ -191,7 +192,7 @@ Map::Map(){
     tiles[i].tileN = i;
   for(int i = 0; i < NUM_TILES; i++)
     tilesRevealed[i] = false;
-    
+
   tilesRevealed[0] = true;
 
   tiles[0].hexes[0]->neighboors[2] = &outsideOfMap;
@@ -220,11 +221,6 @@ Map::Map(){
   this->loadEnemies(E_MAGE);
   this->loadEnemies(E_KEEP);
   this->loadEnemies(E_CITY);
-
-  for(int i = 0; i < 7; i++){
-    if(tiles[0].hexes[i]->location == ORC)
-      tiles[0].hexes[i]->faceUpEnemyToken = this->getEnemy(E_ORC);
-  }
 }
 
 void Map::loadEnemies(ENEMY_TYPE type){
@@ -456,6 +452,9 @@ bool Map::revealTile(int tilePos){
 
     if(tiles[tilePos].hexes[i]->location == DRACONUM)
       tiles[tilePos].hexes[i]->faceUpEnemyToken = this->getEnemy(E_DRAKE);
+
+    if(tiles[tilePos].hexes[i]->location == KEEP)
+      tiles[tilePos].hexes[i]->faceDownEnemyToken = E_KEEP;
   }
 
   //TODO: Adjust outsideOfMap

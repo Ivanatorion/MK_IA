@@ -37,6 +37,7 @@ class Game{
 
     void gainSkill();
     void gainAdvancedAction();
+    void gainSpell();
 
     void stepHealPlayer(int actionParam);
     void stepUseCardWeak(int actionParam);
@@ -60,6 +61,8 @@ class Game{
     void stepAdvanceBattlePhase(int actionParam);
 
     void rollSourceDie(int dieN);
+
+    void onConquerSite();
 };
 
 #endif

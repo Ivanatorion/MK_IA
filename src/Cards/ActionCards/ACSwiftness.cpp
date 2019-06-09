@@ -13,7 +13,7 @@ std::string ACSwiftness::getName(){
 }
 
 void ACSwiftness::playCardWeak(STATE *s){
-  s->avMove = s->avMove + 2;
+  givePlayerMove(s, 2);
 }
 
 void ACSwiftness::playCardStrong(STATE *s){

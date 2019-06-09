@@ -31,5 +31,5 @@ void ACColdToughness::playCardWeak(STATE *s){
 }
 
 void ACColdToughness::playCardStrong(STATE *s){
-
+	s->avIceBlock = s->avIceBlock + 5;
 }

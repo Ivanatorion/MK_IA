@@ -24,7 +24,7 @@ void ACInstinct::playCardWeak(STATE *s){
 
 	switch (choice) {
 		case 0:
-			s->avMove = s->avMove + 2;
+			givePlayerMove(s, 2);
 			break;
 		case 1:
 			s->avInfluence = s->avInfluence + 2;
@@ -48,24 +48,16 @@ void ACInstinct::playCardStrong(STATE *s){
 
 	switch (choice) {
 		case 0:
-			s->avMove = s->avMove + 4;
-			if(s->ConcentrationNextCard)
-		    s->avMove = s->avMove + 2;
+			givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
 			break;
 		case 1:
-			s->avInfluence = s->avInfluence + 4;
-			if(s->ConcentrationNextCard)
-		    s->avInfluence = s->avInfluence + 2;
+			givePlayerInfluence(s, s->ConcentrationNextCard ? 6 : 4);
 			break;
 		case 2:
-			s->avAttack = s->avAttack + 4;
-			if(s->ConcentrationNextCard)
-		    s->avAttack = s->avAttack + 2;
+			givePlayerAttack(s, s->ConcentrationNextCard ? 6 : 4);
 			break;
 		case 3:
-			s->avBlock = s->avBlock + 4;
-			if(s->ConcentrationNextCard)
-		    s->avBlock = s->avBlock + 2;
+			givePlayerBlock(s, s->ConcentrationNextCard ? 6 : 4);
 			break;
 	}
 }

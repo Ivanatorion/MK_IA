@@ -19,6 +19,8 @@ class WindowsUI : public UserInterface {
 
     void printEnemiesSelection(STATE *s);
 
+    void printEnemiesOnMap(STATE *s);
+
     void printStateBattle(STATE *s);
     void printStateBattleRanged(STATE *s);
     void printStateBattleBlock(STATE *s);

@@ -32,7 +32,7 @@ void WindowsUI::printCrystals(STATE *s){
 }
 
 void WindowsUI::printSpecial(STATE *s){
-  printf("Special:\n\n");
+  printf("Special:\n");
 
   if(s->ManaDrawWeakActive)
     printf("Can take extra dice (ManaDraw)\n");
@@ -40,6 +40,8 @@ void WindowsUI::printSpecial(STATE *s){
     printf("Next Strong Card is empowered (Concentration)\n");
   if(s->TovakIDontGiveADamn)
     printf("Next Sideways Card Gives 2/3 of choosen attribute (Tovak IDGAD)\n");
+  if(s->IceShieldStrong)
+    printf("Next Blocked Enemy gets armor -3 (Ice Shield)\n");
 }
 
 void WindowsUI::printPlayerHand(STATE *s){
@@ -90,6 +92,19 @@ void WindowsUI::printEnemiesSelection(STATE *s){
       printf(" (Arcane Imune)");
       textcolor(TGREY);
     }
+    if(s->BattleEnemies[i].pRes){
+      printf(" (Physical Resistance)");
+    }
+    if(s->BattleEnemies[i].fRes){
+      textcolor(TRED);
+      printf(" (Fire Resistance)");
+      textcolor(TGREY);
+    }
+    if(s->BattleEnemies[i].iRes){
+      textcolor(TINDIGO);
+      printf(" (Ice Resistance)");
+      textcolor(TGREY);
+    }
   }
   printf("\n\nEnemies Selected: {");
   for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
@@ -97,7 +112,7 @@ void WindowsUI::printEnemiesSelection(STATE *s){
     if(i != s->BattleEnemiesSelected.size()-1)
       printf(", ");
   }
-  printf("}\nEnemies Selected Resistances: ");
+  printf("}\nEnemies Selected Resistances:");
   for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
     if(s->BattleEnemiesSelected[i].pRes)
       pResS = true;
@@ -108,10 +123,55 @@ void WindowsUI::printEnemiesSelection(STATE *s){
     totalHealth = totalHealth + s->BattleEnemiesSelected[i].health;
   }
   if(pResS) printf(" Physical");
-  if(fResS) printf(" Fire");
-  if(iResS) printf(" Ice");
-  if(fResS && iResS) printf(" ColdFire");
+  if(fResS){
+    textcolor(TRED);
+    printf(" Fire");
+    textcolor(TGREY);
+  }
+  if(iResS){
+    textcolor(TINDIGO);
+    printf(" Ice");
+    textcolor(TGREY);
+  }
+  if(fResS && iResS){
+    textcolor(TINDIGO);
+    printf(" Cold");
+    textcolor(TRED);
+    printf("Fire");
+    textcolor(TGREY);
+  }
   printf("\nTotal Health: %d\n", totalHealth);
+}
+
+void WindowsUI::printEnemiesOnMap(STATE *s){
+  TILE tile;
+
+  printf("Enemies on the map:\n");
+
+  for(int i = 0; i < NUM_TILES; i++){
+    tile = s->m->getTile(i);
+    if(tile.tileN != -1){
+      for(int j = 0; j < 7; j++){
+        if(tile.hexes[j]->faceUpEnemyToken.enemyType != NONEE){
+          printf("Tile: %02d, Hex: %02d, Enemy: %s", i, j, tile.hexes[j]->faceUpEnemyToken.name.c_str());
+          if(tile.hexes[j]->faceUpEnemyToken2.enemyType != NONEE)
+            printf(" and %s", tile.hexes[j]->faceUpEnemyToken2.name.c_str());
+          printf("\n");
+        }
+        if(tile.hexes[j]->faceDownEnemyToken != NONEE){
+          printf("Tile: %02d, Hex: %02d, Enemy: ", i, j);
+          switch (tile.hexes[j]->faceDownEnemyToken) {
+            case E_KEEP:
+              printf("Grey Token\n");
+              break;
+            case E_MAGE:
+              printf("Purple Token\n");
+              break;
+          }
+        }
+      }
+    }
+  }
 }
 
 void WindowsUI::textcolor(COLOR c){
@@ -275,6 +335,9 @@ void WindowsUI::printStateMoveExplore(STATE *s){
 
   printSpecial(s);
 
+  printf("\n");
+
+  printEnemiesOnMap(s);
 }
 
 void WindowsUI::printStateBattle(STATE *s){

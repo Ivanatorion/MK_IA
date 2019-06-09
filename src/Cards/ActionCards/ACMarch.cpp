@@ -13,12 +13,9 @@ std::string ACMarch::getName(){
 }
 
 void ACMarch::playCardWeak(STATE *s){
-	s->avMove = s->avMove + 2;
+	givePlayerMove(s, 2);
 }
 
 void ACMarch::playCardStrong(STATE *s){
-	s->avMove = s->avMove + 4;
-
-	if(s->ConcentrationNextCard)
-    s->avMove = s->avMove + 2;
+	givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
 }

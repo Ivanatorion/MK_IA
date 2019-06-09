@@ -22,17 +22,14 @@ void ACRage::playCardWeak(STATE *s){
 
   switch (choice) {
     case 0:
-      s->avAttack = s->avAttack + 2;
+      givePlayerAttack(s, 2);
       break;
     case 1:
-      s->avBlock = s->avBlock + 2;
+      givePlayerBlock(s, 2);
       break;
   }
 }
 
 void ACRage::playCardStrong(STATE *s){
-  s->avAttack = s->avAttack + 4;
-
-  if(s->ConcentrationNextCard)
-    s->avAttack = s->avAttack + 2;
+  givePlayerAttack(s, s->ConcentrationNextCard ? 6 : 4);
 }

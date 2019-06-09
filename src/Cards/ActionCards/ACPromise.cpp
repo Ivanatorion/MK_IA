@@ -13,12 +13,9 @@ std::string ACPromise::getName(){
 }
 
 void ACPromise::playCardWeak(STATE *s){
-  s->avInfluence = s->avInfluence + 2;
+  givePlayerInfluence(s, 2);
 }
 
 void ACPromise::playCardStrong(STATE *s){
-  s->avInfluence = s->avInfluence + 4;
-
-  if(s->ConcentrationNextCard)
-    s->avInfluence = s->avInfluence + 2;
+  givePlayerInfluence(s, s->ConcentrationNextCard ? 6 : 4);
 }

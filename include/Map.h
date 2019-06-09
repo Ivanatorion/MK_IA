@@ -25,6 +25,7 @@ typedef struct hex{
   ENEMY faceUpEnemyToken;          //Information on the enemy token on this tile.
   ENEMY faceUpEnemyToken2;         //Only Used on SpawningGrounds.
   ENEMY_TYPE faceDownEnemyToken;   //Type of the enemy token that is face down on this hex (NONEE if none)
+  bool hasShieldToken;             //If there is a Shield Token here
 } HEX;
 
 typedef struct til{

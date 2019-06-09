@@ -36,18 +36,33 @@ typedef struct stado{
   //Pointer to the Hex Which Contains an enemy that should be removed if the player defeats it in battle.
   HEX *rampagingHexAttacked;
 
+  bool assaultingSite;
+
+  int spellsToGain;
+
   //Unit Containers
   std::vector<Unit*> PlayerUnits;
   std::vector<Unit*> UnitOffer;
   std::vector<Unit*> RegularUnitsDeck;
   std::vector<Unit*> EliteUnitsDeck;
 
+  //Spells and Advanced Action Offer
+  Card *spellOffer[3];
+  Card *advancedActionsOffer[3];
+
+  //Other Decks
+  Deck advancedActionsDeck;
+  Deck artifactsDeck;
+  Deck spellsDeck;
+
   //Skills
   std::vector<Skill*> SkillsNotObtained;
   std::vector<Skill*> SkillsObtained;
 
+  //Player Stuff
   std::vector<Card*> playerHand;   //Cards in the player hand.
   int playerHandMaxSize;           //Maximum cards the player can hold.
+  int playerHandSizeBonus;
   int currentRound;                //Current game round.
   int playerFame;                  //The ammount of "fame" the player has.
   int playerReputation;            //The level of reputation.
@@ -57,6 +72,11 @@ typedef struct stado{
   int playerArmor;
   int playerLevel;
   int playerCommandTokens;
+  int playerKeepsConquered;
+
+  //Player Decks
+  Deck playerDiscardDeck;
+  Deck playerDeedDeck;
 
   HEX *curHex;
 
@@ -64,15 +84,6 @@ typedef struct stado{
 
   int playerCrystalsRed, playerCrystalsWhite, playerCrystalsGreen, playerCrystalsBlue;
   int playerTokensRed, playerTokensWhite, playerTokensGreen, playerTokensBlue, playerTokensBlack;
-
-  Deck playerDiscardDeck;
-  Deck playerDeedDeck;
-  Deck advancedActionsDeck;
-  Deck artifactsDeck;
-  Deck spellsDeck;
-
-  Card *spellOffer[3];
-  Card *advancedActionsOffer[3];
 
   COLOR sourceDice[N_DICE_IN_SOURCE];
   bool diceTaken;
@@ -91,6 +102,8 @@ typedef struct stado{
   bool ManaDrawWeakActive;
   bool ConcentrationNextCard;
   bool TovakIDontGiveADamn;
+  bool IceShieldStrong;
+  bool AgilityWeak, AgilityStrong;
 
   //End Turn
   int fameToGain;

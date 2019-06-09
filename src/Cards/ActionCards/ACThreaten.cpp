@@ -13,14 +13,11 @@ std::string ACThreaten::getName(){
 }
 
 void ACThreaten::playCardWeak(STATE *s){
-	s->avInfluence = s->avInfluence + 2;
+	givePlayerInfluence(s, 2);
 }
 
 void ACThreaten::playCardStrong(STATE *s){
-	s->avInfluence = s->avInfluence + 5;
-
-	if(s->ConcentrationNextCard)
-		s->avInfluence = s->avInfluence + 2;
+	givePlayerInfluence(s, s->ConcentrationNextCard ? 7 : 5);
 
 	s->repToGain = s->repToGain - 1;
 }

@@ -13,12 +13,9 @@ std::string ACStamina::getName(){
 }
 
 void ACStamina::playCardWeak(STATE *s){
-  s->avMove = s->avMove + 2;
+  givePlayerMove(s, 2);
 }
 
 void ACStamina::playCardStrong(STATE *s){
-  s->avMove = s->avMove + 4;
-
-  if(s->ConcentrationNextCard)
-    s->avMove = s->avMove + 2;
+  givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
 }
