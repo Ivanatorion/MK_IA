@@ -22,6 +22,6 @@ void ACFireBolt::playCardWeak(STATE *s){
 void ACFireBolt::playCardStrong(STATE *s){
 	s->avRangedFireAttack = s->avRangedFireAttack + 3;
 
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     s->avRangedFireAttack = s->avRangedFireAttack + 2;
 }

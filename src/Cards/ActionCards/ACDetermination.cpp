@@ -31,5 +31,5 @@ void ACDetermination::playCardWeak(STATE *s){
 }
 
 void ACDetermination::playCardStrong(STATE *s){
-  givePlayerBlock(s, s->ConcentrationNextCard ? 7 : 5);
+  givePlayerBlock(s, s->ConcentrationStrong ? 7 : 5);
 }

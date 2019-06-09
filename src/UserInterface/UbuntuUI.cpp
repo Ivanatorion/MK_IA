@@ -50,14 +50,30 @@ void UbuntuUI::printSource(STATE *s){
 }
 
 void UbuntuUI::printSpecial(STATE *s){
-  printf("Special:\n\n");
+  printf("Special:\n");
 
-  if(s->ManaDrawWeakActive)
+  if(s->ManaDrawWeak)
     printf("Can take extra dice (ManaDraw)\n");
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     printf("Next Strong Card is empowered (Concentration)\n");
   if(s->TovakIDontGiveADamn)
     printf("Next Sideways Card Gives 2/3 of choosen attribute (Tovak IDGAD)\n");
+  if(s->IceShieldStrong)
+    printf("Next Blocked Enemy gets armor -3 (Ice Shield)\n");
+  if(s->FrostBridgeWeak)
+    printf("Move cost of Swamps is 1 (Frost Bridge)");
+  if(s->FrostBridgeStrong)
+    printf("Move cost of Swamps and Lakes is 1 (Frost Bridge)");
+  if(s->SongOfWindWeak)
+    printf("Move cost of Plains/Deserts/Wastelands reduced by 1 (Song Of Wind)\n");
+  if(s->SongOfWindStrong)
+    printf("Move cost of Plains/Deserts/Wastelands reduced by 2 (Song Of Wind)\n");
+  if(s->SongOfWindStrongBlue)
+    printf("Can travel through Lakes (Song Of Wind)\n");
+  if(s->PathFindingWeak)
+    printf("Move cost of terrains reduced by 1 (Min 2) (Path Finding)\n");
+  if(s->PathFindingStrong)
+    printf("Move cost of terrains is 2 (Path Finding)\n");
 }
 
 void UbuntuUI::printColored(std::string s, COLOR c){

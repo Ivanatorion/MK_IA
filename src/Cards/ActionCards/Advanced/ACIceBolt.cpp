@@ -22,6 +22,6 @@ void ACIceBolt::playCardWeak(STATE *s){
 void ACIceBolt::playCardStrong(STATE *s){
 	s->avRangedIceAttack = s->avRangedIceAttack + 3;
 
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     s->avRangedIceAttack = s->avRangedIceAttack + 2;
 }

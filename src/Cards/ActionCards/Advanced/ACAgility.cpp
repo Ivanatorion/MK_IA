@@ -21,5 +21,5 @@ void ACAgility::playCardWeak(STATE *s){
 
 void ACAgility::playCardStrong(STATE *s){
   s->AgilityStrong = true;
-	givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
+	givePlayerMove(s, s->ConcentrationStrong ? 6 : 4);
 }

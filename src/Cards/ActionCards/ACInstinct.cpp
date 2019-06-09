@@ -48,16 +48,16 @@ void ACInstinct::playCardStrong(STATE *s){
 
 	switch (choice) {
 		case 0:
-			givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
+			givePlayerMove(s, s->ConcentrationStrong ? 6 : 4);
 			break;
 		case 1:
-			givePlayerInfluence(s, s->ConcentrationNextCard ? 6 : 4);
+			givePlayerInfluence(s, s->ConcentrationStrong ? 6 : 4);
 			break;
 		case 2:
-			givePlayerAttack(s, s->ConcentrationNextCard ? 6 : 4);
+			givePlayerAttack(s, s->ConcentrationStrong ? 6 : 4);
 			break;
 		case 3:
-			givePlayerBlock(s, s->ConcentrationNextCard ? 6 : 4);
+			givePlayerBlock(s, s->ConcentrationStrong ? 6 : 4);
 			break;
 	}
 }

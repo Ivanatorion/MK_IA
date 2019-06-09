@@ -15,7 +15,7 @@ std::string ACManaDraw::getName(){
 }
 
 void ACManaDraw::playCardWeak(STATE *s){
-	s->ManaDrawWeakActive = true;
+	s->ManaDrawWeak = true;
 }
 
 void ACManaDraw::playCardStrong(STATE *s){

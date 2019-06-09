@@ -22,6 +22,6 @@ void ACIceShield::playCardStrong(STATE *s){
 	s->avIceBlock = s->avIceBlock + 3;
   s->IceShieldStrong = true;
 
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     s->avIceBlock = s->avIceBlock + 2;
 }

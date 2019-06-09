@@ -35,9 +35,9 @@ void ACBloodRage::playCardStrong(STATE *s){
 	int choice = s->player->chooseOption(choices);
 
   if(choice == 1){
-    givePlayerAttack(s, s->ConcentrationNextCard ? 11 : 9);
+    givePlayerAttack(s, s->ConcentrationStrong ? 11 : 9);
     s->playerHand.push_back(new Wound());
   }
   else
-    givePlayerAttack(s, s->ConcentrationNextCard ? 6 : 4);
+    givePlayerAttack(s, s->ConcentrationStrong ? 6 : 4);
 }

@@ -22,6 +22,6 @@ void ACSwiftBolt::playCardWeak(STATE *s){
 void ACSwiftBolt::playCardStrong(STATE *s){
 	s->avRangedAttack = s->avRangedAttack + 4;
 
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     s->avRangedAttack = s->avRangedAttack + 2;
 }

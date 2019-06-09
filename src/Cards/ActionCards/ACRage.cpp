@@ -31,5 +31,5 @@ void ACRage::playCardWeak(STATE *s){
 }
 
 void ACRage::playCardStrong(STATE *s){
-  givePlayerAttack(s, s->ConcentrationNextCard ? 6 : 4);
+  givePlayerAttack(s, s->ConcentrationStrong ? 6 : 4);
 }

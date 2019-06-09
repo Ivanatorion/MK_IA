@@ -205,6 +205,8 @@ Map::Map(){
   tiles[0].hexes[6]->neighboors[3] = &outsideOfMap;
   tiles[0].hexes[6]->neighboors[4] = &outsideOfMap;
   tiles[0].hexes[6]->neighboors[5] = &outsideOfMap;
+  tiles[0].hexes[4]->neighboors[3] = &outsideOfMap;
+  tiles[0].hexes[4]->neighboors[5] = &outsideOfMap;
 
   this->initTileStack();
 
@@ -457,7 +459,34 @@ bool Map::revealTile(int tilePos){
       tiles[tilePos].hexes[i]->faceDownEnemyToken = E_KEEP;
   }
 
-  //TODO: Adjust outsideOfMap
+  //Adjust OutsideOfMap
+  if(tilePos == 1 || tilePos == 3 || tilePos == 6 || tilePos == 10){
+    tiles[tilePos].hexes[5]->neighboors[5] = &outsideOfMap;
+    tiles[tilePos].hexes[6]->neighboors[3] = &outsideOfMap;
+    tiles[tilePos].hexes[6]->neighboors[4] = &outsideOfMap;
+    tiles[tilePos].hexes[6]->neighboors[5] = &outsideOfMap;
+    tiles[tilePos].hexes[4]->neighboors[3] = &outsideOfMap;
+    tiles[tilePos].hexes[4]->neighboors[5] = &outsideOfMap;
+  }
+
+  if(tilePos == 2 || tilePos == 5 || tilePos == 9 || tilePos == 14){
+    tiles[tilePos].hexes[0]->neighboors[2] = &outsideOfMap;
+    tiles[tilePos].hexes[2]->neighboors[0] = &outsideOfMap;
+    tiles[tilePos].hexes[2]->neighboors[2] = &outsideOfMap;
+    tiles[tilePos].hexes[2]->neighboors[4] = &outsideOfMap;
+    tiles[tilePos].hexes[5]->neighboors[2] = &outsideOfMap;
+    tiles[tilePos].hexes[5]->neighboors[4] = &outsideOfMap;
+  }
+
+  if(tilePos > 9 && tilePos < 15){
+    tiles[tilePos].hexes[4]->neighboors[1] = &outsideOfMap;
+    tiles[tilePos].hexes[1]->neighboors[0] = &outsideOfMap;
+    tiles[tilePos].hexes[1]->neighboors[1] = &outsideOfMap;
+    tiles[tilePos].hexes[1]->neighboors[3] = &outsideOfMap;
+    tiles[tilePos].hexes[0]->neighboors[0] = &outsideOfMap;
+    tiles[tilePos].hexes[0]->neighboors[1] = &outsideOfMap;
+  }
+
   //Adjusts neighboors
   static const short int refTable[NUM_TILES][6] = {{ 2, 1,-1,-1,-1,-1},
                                                    { 4, 3,-1,-1, 0, 2},

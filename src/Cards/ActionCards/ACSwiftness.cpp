@@ -19,6 +19,6 @@ void ACSwiftness::playCardWeak(STATE *s){
 void ACSwiftness::playCardStrong(STATE *s){
   s->avRangedAttack = s->avRangedAttack + 3;
 
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     s->avRangedAttack = s->avRangedAttack + 2;
 }

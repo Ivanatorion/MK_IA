@@ -99,11 +99,14 @@ typedef struct stado{
   Player *player;
 
   //Special effects
-  bool ManaDrawWeakActive;
-  bool ConcentrationNextCard;
+  bool ManaDrawWeak;
+  bool ConcentrationStrong;
   bool TovakIDontGiveADamn;
   bool IceShieldStrong;
   bool AgilityWeak, AgilityStrong;
+  bool FrostBridgeWeak, FrostBridgeStrong;
+  bool SongOfWindWeak, SongOfWindStrong, SongOfWindStrongBlue;
+  bool PathFindingWeak, PathFindingStrong;
 
   //End Turn
   int fameToGain;

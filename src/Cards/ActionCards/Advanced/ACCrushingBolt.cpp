@@ -22,6 +22,6 @@ void ACCrushingBolt::playCardWeak(STATE *s){
 void ACCrushingBolt::playCardStrong(STATE *s){
 	s->avSiegeAttack = s->avSiegeAttack + 3;
 
-  if(s->ConcentrationNextCard)
+  if(s->ConcentrationStrong)
     s->avSiegeAttack = s->avSiegeAttack + 2;
 }

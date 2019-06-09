@@ -17,5 +17,5 @@ void ACMarch::playCardWeak(STATE *s){
 }
 
 void ACMarch::playCardStrong(STATE *s){
-	givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
+	givePlayerMove(s, s->ConcentrationStrong ? 6 : 4);
 }

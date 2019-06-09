@@ -4,6 +4,7 @@
 
 #include "../include/Game.h"
 #include "../include/Player/HumanPlayer.h"
+#include "../include/Player/BotPlayer.h"
 #include "../include/UserInterface/WindowsUI.h"
 #include "../include/UserInterface/UbuntuUI.h"
 
@@ -13,7 +14,12 @@ void initialize(){
 
 int main(int argc, char* argv[]){
   initialize();
-  Player *player = new HumanPlayer();
+  Player *player;
+  if(argc > 1)
+    player = new BotPlayer(true);
+  else
+    player = new HumanPlayer();
+    
   UserInterface *ui;
 
   //Changes UI based on target system

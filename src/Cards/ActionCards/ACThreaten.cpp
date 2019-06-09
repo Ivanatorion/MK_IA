@@ -17,7 +17,7 @@ void ACThreaten::playCardWeak(STATE *s){
 }
 
 void ACThreaten::playCardStrong(STATE *s){
-	givePlayerInfluence(s, s->ConcentrationNextCard ? 7 : 5);
+	givePlayerInfluence(s, s->ConcentrationStrong ? 7 : 5);
 
 	s->repToGain = s->repToGain - 1;
 }

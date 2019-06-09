@@ -59,6 +59,10 @@
 #include "../include/Cards/ActionCards/Advanced/ACIceShield.h"
 #include "../include/Cards/ActionCards/Advanced/ACAgility.h"
 #include "../include/Cards/ActionCards/Advanced/ACRefreshingWalk.h"
+#include "../include/Cards/ActionCards/Advanced/ACIntimidate.h"
+#include "../include/Cards/ActionCards/Advanced/ACFrostBridge.h"
+#include "../include/Cards/ActionCards/Advanced/ACSongOfWind.h"
+#include "../include/Cards/ActionCards/Advanced/ACPathFinding.h"
 
 #include "../include/Cards/Wound.h"
 
@@ -108,12 +112,16 @@ void Game::resetRound(){
   state.UnitOffer.clear();
   for(int i = 0; i < N_UNITS_IN_OFFER; i++){
     if(i % 2 == 0 && state.m->isCoreTileRevealed()){
-      state.UnitOffer.push_back(state.EliteUnitsDeck[state.EliteUnitsDeck.size()-1]);
-      state.EliteUnitsDeck.erase(state.EliteUnitsDeck.end() - 1);
+      if(state.EliteUnitsDeck.size() > 0){
+        state.UnitOffer.push_back(state.EliteUnitsDeck[state.EliteUnitsDeck.size()-1]);
+        state.EliteUnitsDeck.erase(state.EliteUnitsDeck.end() - 1);
+      }
     }
     else{
-      state.UnitOffer.push_back(state.RegularUnitsDeck[state.RegularUnitsDeck.size()-1]);
-      state.RegularUnitsDeck.erase(state.RegularUnitsDeck.end() - 1);
+      if(state.RegularUnitsDeck.size() > 0){
+        state.UnitOffer.push_back(state.RegularUnitsDeck[state.RegularUnitsDeck.size()-1]);
+        state.RegularUnitsDeck.erase(state.RegularUnitsDeck.end() - 1);
+      }
     }
   }
 
@@ -124,11 +132,18 @@ void Game::resetRound(){
   }
   state.advancedActionsOffer[2] = state.advancedActionsOffer[1];
   state.advancedActionsOffer[1] = state.advancedActionsOffer[0];
-  state.advancedActionsOffer[0] = state.advancedActionsDeck.drawCard();
+  if(!state.advancedActionsDeck.isEmpty())
+    state.advancedActionsOffer[0] = state.advancedActionsDeck.drawCard();
+  else
+    state.advancedActionsOffer[0] = NULL;
 
   //Shuffles the Player Deed Deck and draw up to its hand maximum size.
   while(!state.playerDiscardDeck.isEmpty())
     state.playerDeedDeck.addCardTop(state.playerDiscardDeck.drawCard());
+  while(state.playerHand.size() > 0){
+    state.playerDeedDeck.addCardTop(state.playerHand[0]);
+    state.playerHand.erase(state.playerHand.begin());
+  }
   state.playerDeedDeck.shuffle();
   for(int i = 0; i < state.playerHandMaxSize; i++)
     state.playerHand.push_back(state.playerDeedDeck.drawCard());
@@ -187,6 +202,10 @@ void Game::resetGame(){
   state.advancedActionsDeck.addCardTop(new ACIceShield());
   state.advancedActionsDeck.addCardTop(new ACAgility());
   state.advancedActionsDeck.addCardTop(new ACRefreshingWalk());
+  state.advancedActionsDeck.addCardTop(new ACIntimidate());
+  state.advancedActionsDeck.addCardTop(new ACFrostBridge());
+  state.advancedActionsDeck.addCardTop(new ACSongOfWind());
+  state.advancedActionsDeck.addCardTop(new ACPathFinding());
   state.advancedActionsDeck.shuffle();
 
   state.advancedActionsOffer[2] = state.advancedActionsDeck.drawCard();
@@ -569,7 +588,7 @@ void Game::stepUseCardStrong(int actionParam){
     hasMana = true;
   else{
     if(aux->getCardType() == ACTIONCARD){
-      if(state.ConcentrationNextCard){
+      if(state.ConcentrationStrong){
         hasMana = true;
       }
       else{
@@ -666,9 +685,9 @@ void Game::stepUseCardStrong(int actionParam){
   state.playerHand.erase(state.playerHand.begin() + actionParam);
 
   //Check if used Concentration
-  if(state.ConcentrationNextCard){
+  if(state.ConcentrationStrong){
     aux->playCardStrong(&state);
-    state.ConcentrationNextCard = false;
+    state.ConcentrationStrong = false;
   }
   else{
     aux->playCardStrong(&state);
@@ -793,6 +812,38 @@ void Game::stepMoveToHex(int actionParam){
 
   if(next != NULL && next->terrain != NONET){
     moveCost = state.m->getMoveCost(*next, state.isDayNight);
+
+    //FrostBridge
+    if(state.FrostBridgeWeak && next->terrain == SWAMP)
+      moveCost = 1;
+    if(state.FrostBridgeStrong && (next->terrain == SWAMP || next->terrain == LAKE))
+      moveCost = 1;
+
+    //PathFinding
+    if(state.PathFindingWeak){
+      moveCost = moveCost - 1;
+      if(moveCost < 2)
+        moveCost = 2;
+    }
+    if(state.PathFindingStrong){
+      if(moveCost < 50) moveCost = 2;
+    }
+
+    //SongOfWind
+    if(state.SongOfWindWeak && (next->terrain == PLAIN || next->terrain == DESERT || next->terrain == WASTELAND)){
+      moveCost = moveCost - 1;
+      if(moveCost < 0)
+        moveCost = 0;
+    }
+    if(state.SongOfWindStrong && (next->terrain == PLAIN || next->terrain == DESERT || next->terrain == WASTELAND)){
+      moveCost = moveCost - 2;
+      if(moveCost < 0)
+        moveCost = 0;
+    }
+    if(state.SongOfWindStrongBlue && next->terrain == LAKE){
+      moveCost = 0;
+    }
+
     if(state.avMove >= moveCost){
       state.avMove = state.avMove - moveCost;
       state.curHex = next;
@@ -852,6 +903,7 @@ void Game::stepMoveToHex(int actionParam){
         }
       if(!hasBonus)
         state.playerHandSizeBonus = 0;
+
     }
   }
 }
@@ -885,7 +937,7 @@ void Game::stepRevealTile(int actionParam){
 }
 
 void Game::stepTakeDieFromSource(int actionParam){
-  if(actionParam >= N_DICE_IN_SOURCE || (state.diceTaken && !state.ManaDrawWeakActive))
+  if(actionParam >= N_DICE_IN_SOURCE || (state.diceTaken && !state.ManaDrawWeak))
     return;
 
   std::vector<std::string> choices;
@@ -939,7 +991,7 @@ void Game::stepTakeDieFromSource(int actionParam){
   if(!state.diceTaken)
     state.diceTaken = true;
   else
-    state.ManaDrawWeakActive = false;
+    state.ManaDrawWeak = false;
   state.sourceDice[actionParam] = NONE;
 }
 
@@ -954,10 +1006,6 @@ void Game::stepRecruitUnit(int actionParam){
 void Game::stepEndTurn(int actionParam){
   state.diceTaken = false;
   state.gameScene = MOVE_AND_EXPLORE;
-
-  //Draw Cards
-  while(state.playerHand.size() < state.playerHandMaxSize + state.playerHandSizeBonus && !state.playerDeedDeck.isEmpty())
-    state.playerHand.push_back(state.playerDeedDeck.drawCard());
 
   //Clear all Mana Tokens
   state.playerTokensRed = 0;
@@ -998,6 +1046,15 @@ void Game::stepEndTurn(int actionParam){
   for(int i = 0; i < state.SkillsObtained.size(); i++)
     if(state.SkillsObtained[i]->getCooldown() == ONCE_A_TURN)
       state.SkillsObtained[i]->setOnCooldown(false);
+
+  //Draw Cards
+  while(state.playerHand.size() < state.playerHandMaxSize + state.playerHandSizeBonus && !state.playerDeedDeck.isEmpty())
+    state.playerHand.push_back(state.playerDeedDeck.drawCard());
+
+  //Forces Round Reset
+  if(state.playerHand.size() == 0 && state.playerDeedDeck.isEmpty())
+    this->resetRound();
+
 }
 
 void Game::stepHealPlayer(int actionParam){
@@ -1371,12 +1428,19 @@ void Game::clearStateAvs(){
 }
 
 void Game::clearSpecialEffects(){
-  state.ManaDrawWeakActive = false;
-  state.ConcentrationNextCard = false;
+  state.ManaDrawWeak = false;
+  state.ConcentrationStrong = false;
   state.TovakIDontGiveADamn = false;
   state.IceShieldStrong = false;
   state.AgilityStrong = false;
   state.AgilityWeak = false;
+  state.PathFindingWeak = false;
+  state.PathFindingStrong = false;
+  state.SongOfWindWeak = false;
+  state.SongOfWindStrong = false;
+  state.SongOfWindStrongBlue = false;
+  state.FrostBridgeWeak = false;
+  state.FrostBridgeStrong = false;
 }
 
 void Game::gainSkill(){
@@ -1405,7 +1469,27 @@ void Game::gainSkill(){
 }
 
 void Game::gainAdvancedAction(){
+  std::vector<std::string> choices;
+  choices.push_back(state.advancedActionsOffer[0]->getName());
+  choices.push_back(state.advancedActionsOffer[1]->getName());
+  choices.push_back(state.advancedActionsOffer[2]->getName());
 
+  int choice = state.player->chooseOption(choices);
+
+  if(state.advancedActionsOffer[choice] == NULL)
+    return;
+
+  state.playerDeedDeck.addCardTop(state.advancedActionsOffer[choice]);
+  state.advancedActionsOffer[choice] = NULL;
+
+  if(choice == 2){
+    state.advancedActionsOffer[2] = state.advancedActionsOffer[1];
+    state.advancedActionsOffer[1] = state.advancedActionsOffer[0];
+  }
+  if(choice == 1){
+    state.advancedActionsOffer[1] = state.advancedActionsOffer[0];
+  }
+  state.advancedActionsOffer[0] = state.advancedActionsDeck.drawCard();
 }
 
 void Game::gainSpell(){

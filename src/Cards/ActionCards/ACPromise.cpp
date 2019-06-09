@@ -17,5 +17,5 @@ void ACPromise::playCardWeak(STATE *s){
 }
 
 void ACPromise::playCardStrong(STATE *s){
-  givePlayerInfluence(s, s->ConcentrationNextCard ? 6 : 4);
+  givePlayerInfluence(s, s->ConcentrationStrong ? 6 : 4);
 }

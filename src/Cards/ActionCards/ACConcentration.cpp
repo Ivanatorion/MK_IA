@@ -35,5 +35,5 @@ void ACConcentration::playCardWeak(STATE *s){
 }
 
 void ACConcentration::playCardStrong(STATE *s){
-	s->ConcentrationNextCard = true;
+	s->ConcentrationStrong = true;
 }

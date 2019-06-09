@@ -17,5 +17,5 @@ void ACStamina::playCardWeak(STATE *s){
 }
 
 void ACStamina::playCardStrong(STATE *s){
-  givePlayerMove(s, s->ConcentrationNextCard ? 6 : 4);
+  givePlayerMove(s, s->ConcentrationStrong ? 6 : 4);
 }
