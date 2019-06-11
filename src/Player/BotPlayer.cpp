@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 
 #include "../../include/Player/BotPlayer.h"
 
