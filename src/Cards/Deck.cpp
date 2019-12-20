@@ -22,7 +22,7 @@ Card* Deck::drawCard(){
 }
 
 bool Deck::removeWound(){
-  for(int i = 0; i < deck.size(); i++){
+  for(int i = 0; i < (int) deck.size(); i++){
     if(deck[i]->getCardType() == WOUND){
       delete deck[i];
       deck.erase(deck.begin() + i);

@@ -8,6 +8,8 @@ enum SKILL_CD {ONCE_A_TURN, ONCE_A_ROUND};
 
 class Skill{
   public:
+    virtual ~Skill() = 0;
+
     virtual void onPlayed(STATE *s) = 0;
     SKILL_CD getCooldown(){return this->cooldown;}
     std::string getName(){return this->name;}

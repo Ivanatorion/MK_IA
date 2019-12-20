@@ -33,7 +33,9 @@ void HumanPlayer::takeActionBattleAssign(STATE state, ACTION *rAction, int *rPar
   printf("04) Select Attack to Assign\n");
   printf("05) Quit Game\n");
 
-  scanf("%d", &act);
+  int ret = scanf("%d", &act);
+  while (ret == 0)
+    ret = scanf("%d", &act);
 
   switch(act){
     case 0:
@@ -60,7 +62,11 @@ void HumanPlayer::takeActionBattleAssign(STATE state, ACTION *rAction, int *rPar
   }
 
   printf("\nType the parameter: ");
-  scanf("%d", rParam);
+
+  ret = scanf("%d", rParam);
+  while (ret == 0)
+    ret = scanf("%d", rParam);
+
   printf("\n");
 }
 
@@ -79,7 +85,9 @@ void HumanPlayer::takeActionBattle(STATE state, ACTION *rAction, int *rParam){
   else
     printf("06) Attack Selected Enemies\n");
 
-  scanf("%d", &act);
+  int ret = scanf("%d", &act);
+  while (ret == 0)
+    ret = scanf("%d", &act);
 
   switch(act){
     case 0:
@@ -115,7 +123,11 @@ void HumanPlayer::takeActionBattle(STATE state, ACTION *rAction, int *rParam){
   }
 
   printf("\nType the parameter: ");
-  scanf("%d", rParam);
+
+  ret = scanf("%d", rParam);
+  while (ret == 0)
+    ret = scanf("%d", rParam);
+
   printf("\n");
 }
 
@@ -131,7 +143,9 @@ void HumanPlayer::takeActionMoveExplore(STATE state, ACTION *rAction, int *rPara
   printf("05) End Turn                 12) Heal Player Wound\n");
   printf("06) Recruit Unit             13) Quit Game\n");
 
-  scanf("%d", &act);
+  int ret = scanf("%d", &act);
+  while (ret == 0)
+    ret = scanf("%d", &act);
 
   switch(act){
     case 0:
@@ -179,18 +193,25 @@ void HumanPlayer::takeActionMoveExplore(STATE state, ACTION *rAction, int *rPara
   }
 
   printf("\nType the parameter: ");
-  scanf("%d", rParam);
+
+  ret = scanf("%d", rParam);
+  while (ret == 0)
+    ret = scanf("%d", rParam);
+
   printf("\n");
 }
 
 int HumanPlayer::chooseOption(std::vector<std::string> choices){
   int res = 0;
   printf("Choose:\n\n");
-  for(int i = 0; i < choices.size(); i++)
+  for(int i = 0; i < (int) choices.size(); i++)
     printf("%02d) %s\n", i+1, choices[i].c_str());
 
-  while(res < 1 || res > choices.size())
-    scanf("%d", &res);
+  while(res < 1 || res > (int) choices.size()){
+    int ret = scanf("%d", &res);
+    while (ret == 0)
+      ret = scanf("%d", &res);
+  }
 
   return res - 1;
 }

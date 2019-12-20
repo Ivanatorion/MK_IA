@@ -107,7 +107,7 @@ void Game::resetRound(){
   } while(specialColorCount > N_DICE_IN_SOURCE - specialColorCount);
 
   //Refresh the Unit Offer.
-  for(int i = 0; i < state.UnitOffer.size(); i++)
+  for(int i = 0; i < (int) state.UnitOffer.size(); i++)
     delete state.UnitOffer[i];
   state.UnitOffer.clear();
   for(int i = 0; i < N_UNITS_IN_OFFER; i++){
@@ -483,6 +483,8 @@ void Game::step(ACTION action, int actionParam){
     case QUIT_GAME:
       state.gameOver = true;
       break;
+    case NOTHING:
+      break;
   }
 }
 
@@ -508,7 +510,7 @@ void Game::stepUseCardWeak(int actionParam){
   Card *aux;
 
   //Check if choosen Card is valid
-  if(actionParam < state.playerHand.size())
+  if(actionParam < (int) state.playerHand.size())
     aux = state.playerHand[actionParam];
   else
     return;
@@ -559,6 +561,8 @@ void Game::stepUseCardWeak(int actionParam){
           else
             state.playerCrystalsWhite--;
           break;
+        default:
+          break;
       }
     }
   }
@@ -574,7 +578,7 @@ void Game::stepUseCardStrong(int actionParam){
   Card *aux;
 
   //Check if choosen Card is valid
-  if(actionParam < state.playerHand.size())
+  if(actionParam < (int) state.playerHand.size())
     aux = state.playerHand[actionParam];
   else
     return;
@@ -629,6 +633,8 @@ void Game::stepUseCardStrong(int actionParam){
             else
               state.playerCrystalsWhite--;
             break;
+          default:
+            break;
         }
       }
     }
@@ -675,6 +681,8 @@ void Game::stepUseCardStrong(int actionParam){
             else
               state.playerCrystalsWhite--;
             break;
+          default:
+            break;
         }
       }
     }
@@ -696,7 +704,7 @@ void Game::stepUseCardStrong(int actionParam){
 }
 
 void Game::stepUseCardSideways(int actionParam){
-  if(actionParam < 0 || actionParam > state.playerHand.size() || state.playerHand[actionParam]->getCardType() == WOUND)
+  if(actionParam < 0 || actionParam > (int) state.playerHand.size() || state.playerHand[actionParam]->getCardType() == WOUND)
     return;
 
   int statusAmmount;
@@ -760,7 +768,7 @@ void Game::stepUseCardSideways(int actionParam){
 }
 
 void Game::stepUseUnit(int actionParam){
-  if(actionParam < 0 || actionParam >= state.PlayerUnits.size())
+  if(actionParam < 0 || actionParam >= (int) state.PlayerUnits.size())
     return;
 
   if(state.PlayerUnits[actionParam]->isReady()){
@@ -770,7 +778,7 @@ void Game::stepUseUnit(int actionParam){
 }
 
 void Game::stepUseSkill(int actionParam){
-  if(actionParam < 0 || actionParam >= state.SkillsObtained.size())
+  if(actionParam < 0 || actionParam >= (int) state.SkillsObtained.size())
     return;
 
   if(!state.SkillsObtained[actionParam]->isOnCooldown()){
@@ -875,7 +883,7 @@ void Game::stepMoveToHex(int actionParam){
           state.curHex->faceDownEnemyToken = NONEE;
         }
         state.BattleEnemies.push_back(state.curHex->faceUpEnemyToken);
-        for(int i = 0; i < state.BattleEnemies.size(); i++){
+        for(int i = 0; i < (int) state.BattleEnemies.size(); i++){
           state.BattleEnemies[i].blocked = false;
 
           //Give enemies Fortification
@@ -884,7 +892,7 @@ void Game::stepMoveToHex(int actionParam){
           else
             state.BattleEnemies[i].fortified = true;
 
-          for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+          for(int j = 0; j < (int) state.BattleEnemies[i].attacks.size(); j++){
             state.BattleEnemies[i].attacks[j].blocked = false;
           }
         }
@@ -909,7 +917,7 @@ void Game::stepMoveToHex(int actionParam){
 }
 
 void Game::stepRevealTile(int actionParam){
-  if(actionParam != 0 && actionParam != 1 || state.avMove < 2) //0 - Up, 1 - Down
+  if((actionParam != 0 && actionParam != 1) || state.avMove < 2) //0 - Up, 1 - Down
     return;
 
   bool result;
@@ -996,10 +1004,10 @@ void Game::stepTakeDieFromSource(int actionParam){
 }
 
 void Game::stepRecruitUnit(int actionParam){
-  if(actionParam < 0 || actionParam >= state.UnitOffer.size())
+  if(actionParam < 0 || actionParam >= (int) state.UnitOffer.size())
     return;
 
-  if(state.playerCommandTokens > state.PlayerUnits.size())
+  if(state.playerCommandTokens > (int) state.PlayerUnits.size())
     state.UnitOffer[actionParam]->tryToRecruit(&state);
 }
 
@@ -1043,16 +1051,16 @@ void Game::stepEndTurn(int actionParam){
   clearSpecialEffects();
 
   //Refresh Skills
-  for(int i = 0; i < state.SkillsObtained.size(); i++)
+  for(int i = 0; i < (int) state.SkillsObtained.size(); i++)
     if(state.SkillsObtained[i]->getCooldown() == ONCE_A_TURN)
       state.SkillsObtained[i]->setOnCooldown(false);
 
   //Draw Cards
-  while(state.playerHand.size() < state.playerHandMaxSize + state.playerHandSizeBonus && !state.playerDeedDeck.isEmpty())
+  while((int) state.playerHand.size() < state.playerHandMaxSize + state.playerHandSizeBonus && !state.playerDeedDeck.isEmpty())
     state.playerHand.push_back(state.playerDeedDeck.drawCard());
 
   //Forces Round Reset
-  if(state.playerHand.size() == 0 && state.playerDeedDeck.isEmpty())
+  if((int) state.playerHand.size() == 0 && state.playerDeedDeck.isEmpty())
     this->resetRound();
 
 }
@@ -1064,7 +1072,7 @@ void Game::stepHealPlayer(int actionParam){
   if(state.avHeal == 0)
     return;
 
-  for(int i = 0; i < state.playerHand.size(); i++){
+  for(int i = 0; i < (int) state.playerHand.size(); i++){
     if(state.playerHand[i]->getCardType() == WOUND){
       delete state.playerHand[i];
       state.playerHand.erase(state.playerHand.begin() + i);
@@ -1112,6 +1120,8 @@ void Game::checkEndedOnMine(){
       choices.push_back("Red Crystal");
       choices.push_back("White Crystal");
       choice = state.player->chooseOption(choices);
+      break;
+    default:
       break;
   }
 
@@ -1167,9 +1177,9 @@ void Game::stepAttackRampagingEnemy(int actionParam){
   state.rampagingHexAttacked = state.curHex->neighboors[actionParam];
   state.BattleEnemies.push_back(state.curHex->neighboors[actionParam]->faceUpEnemyToken);
 
-  for(int i = 0; i < state.BattleEnemies.size(); i++){
+  for(int i = 0; i < (int) state.BattleEnemies.size(); i++){
     state.BattleEnemies[i].blocked = false;
-    for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+    for(int j = 0; j < (int) state.BattleEnemies[i].attacks.size(); j++){
       state.BattleEnemies[i].attacks[j].blocked = false;
     }
   }
@@ -1185,7 +1195,7 @@ void Game::stepAttackSelectedEnemies(int actionParam){
   int totalHealth = 0;
   int totalAttack = 0;
 
-  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++){
+  for(int i = 0; i < (int) state.BattleEnemiesSelected.size(); i++){
     if(state.BattleEnemiesSelected[i].fRes)
       fireRes = true;
     if(state.BattleEnemiesSelected[i].iRes)
@@ -1224,7 +1234,7 @@ void Game::stepAttackSelectedEnemies(int actionParam){
   }
 
   if(totalAttack >= totalHealth){
-    for(int i = 0; i < state.BattleEnemiesSelected.size(); i++)
+    for(int i = 0; i < (int) state.BattleEnemiesSelected.size(); i++)
       state.fameToGain = state.fameToGain + state.BattleEnemiesSelected[i].fameReward;
 
     state.BattleEnemiesSelected.clear();
@@ -1247,7 +1257,7 @@ void Game::stepAttackSelectedEnemies(int actionParam){
 void Game::stepSelectEnemy(int actionParam){
   if(state.gameScene != BATTLE_RANGED && state.gameScene != BATTLE_ATTACK && state.gameScene != BATTLE_BLOCK)
     return;
-  if(actionParam < 0 || actionParam >= state.BattleEnemies.size())
+  if(actionParam < 0 || actionParam >= (int) state.BattleEnemies.size())
     return;
 
   state.BattleEnemiesSelected.push_back(state.BattleEnemies[actionParam]);
@@ -1257,7 +1267,7 @@ void Game::stepSelectEnemy(int actionParam){
 void Game::stepSelectAttackToAssign(int actionParam){
   if(state.gameScene != BATTLE_ASSIGN)
     return;
-  if(actionParam < 0 || actionParam >= state.BattleAttacksToAssign.size() || state.BattleAttacksSelected.size() > 0)
+  if(actionParam < 0 || actionParam >= (int) state.BattleAttacksToAssign.size() || state.BattleAttacksSelected.size() > 0)
     return;
 
   state.BattleAttacksSelected.push_back(state.BattleAttacksToAssign[actionParam]);
@@ -1270,7 +1280,7 @@ void Game::stepBlockEnemy(int actionParam){
 
   ENEMY e = state.BattleEnemiesSelected[0];
 
-  if(actionParam < 0 || actionParam >= e.attacks.size() || e.attacks[actionParam].blocked)
+  if(actionParam < 0 || actionParam >= (int) e.attacks.size() || e.attacks[actionParam].blocked)
     return;
 
   ENEMY_ATTACK at = e.attacks[actionParam];
@@ -1294,7 +1304,7 @@ void Game::stepBlockEnemy(int actionParam){
 
     //Check if all attacks of this enemy were blocked
     state.BattleEnemiesSelected[0].blocked = true;
-    for(int i = 0; i < state.BattleEnemiesSelected[0].attacks.size(); i++)
+    for(int i = 0; i < (int) state.BattleEnemiesSelected[0].attacks.size(); i++)
       if(!state.BattleEnemiesSelected[0].attacks[i].blocked)
         state.BattleEnemiesSelected[0].blocked = false;
 
@@ -1308,7 +1318,7 @@ void Game::stepBlockEnemy(int actionParam){
 }
 
 void Game::stepAssingDamageUnit(int actionParam){
-  if(state.gameScene != BATTLE_ASSIGN || state.BattleAttacksSelected.size() != 1 || actionParam < 0 || actionParam >= state.PlayerUnits.size())
+  if(state.gameScene != BATTLE_ASSIGN || (int) state.BattleAttacksSelected.size() != 1 || actionParam < 0 || actionParam >= (int) state.PlayerUnits.size())
     return;
 
   if(state.PlayerUnits[actionParam]->isWounded())
@@ -1320,7 +1330,7 @@ void Game::stepAssingDamageUnit(int actionParam){
 }
 
 void Game::stepAssingDamagePlayer(int actionParam){
-  if(state.gameScene != BATTLE_ASSIGN || state.BattleAttacksSelected.size() != 1)
+  if(state.gameScene != BATTLE_ASSIGN || (int) state.BattleAttacksSelected.size() != 1)
     return;
 
   //Do something
@@ -1339,7 +1349,7 @@ void Game::stepAdvanceBattlePhase(int actionParam){
 
   clearStateAvs();
 
-  for(int i = 0; i < state.BattleEnemiesSelected.size(); i++)
+  for(int i = 0; i < (int) state.BattleEnemiesSelected.size(); i++)
     state.BattleEnemies.push_back(state.BattleEnemiesSelected[i]);
   state.BattleEnemiesSelected.clear();
 
@@ -1349,7 +1359,7 @@ void Game::stepAdvanceBattlePhase(int actionParam){
     state.AgilityStrong = false;
     state.AgilityWeak = false;
 
-    if(state.BattleEnemies.size() == 0 && state.BattleEnemiesSelected.size() == 0){
+    if((int) state.BattleEnemies.size() == 0 && (int) state.BattleEnemiesSelected.size() == 0){
       //Remove Token from map
       if(state.rampagingHexAttacked != NULL){
         state.rampagingHexAttacked->location = NONEL;
@@ -1385,8 +1395,8 @@ void Game::stepAdvanceBattlePhase(int actionParam){
   else if(state.gameScene == BATTLE_BLOCK){
     state.BattleAttacksSelected.clear();
     state.BattleAttacksToAssign.clear();
-    for(int i = 0; i < state.BattleEnemies.size(); i++){
-      for(int j = 0; j < state.BattleEnemies[i].attacks.size(); j++){
+    for(int i = 0; i < (int) state.BattleEnemies.size(); i++){
+      for(int j = 0; j < (int) state.BattleEnemies[i].attacks.size(); j++){
         if(!state.BattleEnemies[i].attacks[j].blocked)
           state.BattleAttacksToAssign.push_back(state.BattleEnemies[i].attacks[j]);
       }
@@ -1397,7 +1407,7 @@ void Game::stepAdvanceBattlePhase(int actionParam){
   }
 
   else if(state.gameScene == BATTLE_ASSIGN){
-    if(state.BattleAttacksToAssign.size() > 0 || state.BattleAttacksSelected.size() > 0)
+    if((int) state.BattleAttacksToAssign.size() > 0 || (int) state.BattleAttacksSelected.size() > 0)
       return;
 
     state.gameScene = BATTLE_ATTACK;

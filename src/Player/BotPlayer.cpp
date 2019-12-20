@@ -257,7 +257,7 @@ int BotPlayer::chooseOption(std::vector<std::string> choices){
 
   if(verbose){
     printf("From: \n");
-    for(int i = 0; i < choices.size(); i++)
+    for(int i = 0; i < (int) choices.size(); i++)
       printf("%s\n", choices[i].c_str());
     printf("\nI choose: %s\n", choices[choice].c_str());
   }

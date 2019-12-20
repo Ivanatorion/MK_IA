@@ -67,16 +67,16 @@ void ACCrystallize::playCardStrong(STATE *s){
 				s->playerCrystalsRed++;
 			break;
 		case 1:
-		if(s->playerCrystalsBlue < 3)
-			s->playerCrystalsBlue++;
+			if(s->playerCrystalsBlue < 3)
+				s->playerCrystalsBlue++;
 			break;
 		case 2:
-		if(s->playerCrystalsGreen < 3)
-			s->playerCrystalsGreen++;
+			if(s->playerCrystalsGreen < 3)
+				s->playerCrystalsGreen++;
 			break;
 		case 3:
-		if(s->playerCrystalsWhite < 3)
-			s->playerCrystalsWhite++;
+			if(s->playerCrystalsWhite < 3)
+				s->playerCrystalsWhite++;
 			break;
 	}
 }

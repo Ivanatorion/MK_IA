@@ -9,6 +9,8 @@
 
 class Unit{
   public:
+    virtual ~Unit() = 0;
+
     virtual std::string getName() = 0;
     virtual void playEffect(STATE *s) = 0;
     virtual void tryToRecruit(STATE *s);     //Tries to recruit Unit

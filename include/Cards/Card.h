@@ -6,6 +6,8 @@
 
 class Card{
   public:
+    virtual ~Card() = 0;
+
     virtual std::string getName() = 0;          //Returns the name of the Card
     virtual void playCardWeak(STATE *s) = 0;    //Affects the state with the "Weak" Card effect.
     virtual void playCardStrong(STATE *s) = 0;  //Affects the state with the "Strong" Card effect.

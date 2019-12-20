@@ -1,5 +1,7 @@
 #include "../../include/Cards/Card.h"
 
+Card::~Card(){};
+
 void Card::givePlayerMove(STATE *s, int moveAmmount){
 	s->avMove = s->avMove + moveAmmount;
 

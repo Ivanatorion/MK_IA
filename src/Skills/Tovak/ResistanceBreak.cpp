@@ -12,14 +12,14 @@ void ResistanceBreak::onPlayed(STATE *s){
     return;
 
   std::vector<std::string> choices;
-  for(int i = 0; i < s->BattleEnemies.size(); i++)
+  for(int i = 0; i < (int) s->BattleEnemies.size(); i++)
     choices.push_back(s->BattleEnemies[i].name);
-  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++)
+  for(int i = 0; i < (int) s->BattleEnemiesSelected.size(); i++)
     choices.push_back(s->BattleEnemiesSelected[i].name);
 
 	int choice = s->player->chooseOption(choices);
 
-  if(choice >= s->BattleEnemies.size()){
+  if(choice >= (int) s->BattleEnemies.size()){
     choice = choice - s->BattleEnemies.size();
     if(s->BattleEnemiesSelected[choice].pRes)
       s->BattleEnemiesSelected[choice].health--;

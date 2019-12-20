@@ -36,11 +36,11 @@ void UbuntuUI::printStateMoveExplore(STATE *s){
   printf("\n\n");
 
   printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
-  for(int i = 0; i < s->PlayerUnits.size(); i++)
+  for(int i = 0; i < (int) s->PlayerUnits.size(); i++)
     printf(" %s", s->PlayerUnits[i]->getName().c_str());
 
   printf("\nCards in Discard Pile: %02d            Units in offer:", s->playerDiscardDeck.getSize());
-  for(int i = 0; i < s->UnitOffer.size(); i++)
+  for(int i = 0; i < (int) s->UnitOffer.size(); i++)
     printf(" %s", s->UnitOffer[i]->getName().c_str());
 
   printf("\nCurrent Round: %d                     ", s->currentRound);
@@ -78,6 +78,8 @@ void UbuntuUI::printStateMoveExplore(STATE *s){
       break;
     case DESERT:
       printf("Desert");
+      break;
+    default:
       break;
   }
   printf("\nHex Location: ");
@@ -159,6 +161,8 @@ void UbuntuUI::printStateBattle(STATE *s){
     case BATTLE_ATTACK:
       printf("Attack");
       break;
+    default:
+      break;
   }
 
   printf("\n\n");
@@ -166,11 +170,11 @@ void UbuntuUI::printStateBattle(STATE *s){
   printf("\n\n");
 
   printf("Cards in Deed Deck: %02d               Units:", s->playerDeedDeck.getSize());
-  for(int i = 0; i < s->PlayerUnits.size(); i++)
+  for(int i = 0; i < (int) s->PlayerUnits.size(); i++)
     printf(" %s", s->PlayerUnits[i]->getName().c_str());
 
   printf("\nCards in Discard Pile: %02d            Units in offer:", s->playerDiscardDeck.getSize());
-  for(int i = 0; i < s->UnitOffer.size(); i++)
+  for(int i = 0; i < (int) s->UnitOffer.size(); i++)
     printf(" %s", s->UnitOffer[i]->getName().c_str());
 
   printSkills(s);
@@ -197,6 +201,8 @@ void UbuntuUI::printStateBattle(STATE *s){
     case BATTLE_ATTACK:
       printStateBattleAttack(s);
       break;
+    default:
+      break;
   }
 
   printf("\n\n");
@@ -214,9 +220,9 @@ void UbuntuUI::printStateBattleRanged(STATE *s){
 
 void UbuntuUI::printStateBattleBlock(STATE *s){
   printf("Enemies: {");
-  for(int i = 0; i < s->BattleEnemies.size(); i++){
+  for(int i = 0; i < (int) s->BattleEnemies.size(); i++){
     printf("\n  %s", s->BattleEnemies[i].name.c_str());
-    for(int j = 0; j < s->BattleEnemies[i].attacks.size(); j++){
+    for(int j = 0; j < (int) s->BattleEnemies[i].attacks.size(); j++){
       if(s->BattleEnemies[i].attacks[j].blocked)
         printf("\n    Blocked: ");
       else
@@ -235,14 +241,16 @@ void UbuntuUI::printStateBattleBlock(STATE *s){
         case COLDFIRE:
           printf("ColdFire");
           break;
+        default:
+          break;
       }
     }
     printf("\n");
   }
   printf("\n}\n\nEnemies Selected: {");
-  for(int i = 0; i < s->BattleEnemiesSelected.size(); i++){
+  for(int i = 0; i < (int) s->BattleEnemiesSelected.size(); i++){
     printf("%s", s->BattleEnemiesSelected[i].name.c_str());
-    if(i != s->BattleEnemiesSelected.size()-1)
+    if(i != (int) s->BattleEnemiesSelected.size()-1)
       printf(", ");
   }
   printf("}");
@@ -250,7 +258,7 @@ void UbuntuUI::printStateBattleBlock(STATE *s){
 
 void UbuntuUI::printStateBattleAssing(STATE *s){
   printf("Attacks to Assign: ");
-  for(int i = 0; i < s->BattleAttacksToAssign.size(); i++){
+  for(int i = 0; i < (int) s->BattleAttacksToAssign.size(); i++){
     if(i != 0)
       printf(", ");
     printf("%d ", s->BattleAttacksToAssign[i].attack);
@@ -267,11 +275,13 @@ void UbuntuUI::printStateBattleAssing(STATE *s){
       case COLDFIRE:
         printf("ColdFire");
         break;
+      default:
+        break;
     }
   }
 
   printf("\n\nAttack Selected:");
-  for(int i = 0; i < s->BattleAttacksSelected.size(); i++){
+  for(int i = 0; i < (int) s->BattleAttacksSelected.size(); i++){
     printf(" %d ", s->BattleAttacksSelected[i].attack);
     switch (s->BattleAttacksSelected[i].type) {
       case PHYSICAL:
@@ -285,6 +295,8 @@ void UbuntuUI::printStateBattleAssing(STATE *s){
         break;
       case COLDFIRE:
         printf("ColdFire");
+        break;
+      default:
         break;
     }
   }
@@ -317,6 +329,8 @@ void UbuntuUI::printEnemiesOnMap(STATE *s){
               break;
             case E_MAGE:
               printf("Purple Token\n");
+              break;
+            default:
               break;
           }
         }
@@ -389,7 +403,7 @@ void UbuntuUI::printPlayerHand(STATE *s){
   if(s->playerHand.size() == 0)
     printColored("None", RED);
   else
-    for(int i = 0; i < s->playerHand.size(); i++){
+    for(int i = 0; i < (int) s->playerHand.size(); i++){
       if(s->playerHand[i]->getCardType() == WOUND)
         printColored("Wound", BLACK);
       else

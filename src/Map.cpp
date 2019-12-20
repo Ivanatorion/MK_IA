@@ -249,6 +249,8 @@ void Map::loadEnemies(ENEMY_TYPE type){
     case E_CITY:
       dataFile = "res/Enemies/WhiteEnemies.dat";
       break;
+    default:
+      break;
   }
 
   FILE *fp = fopen(dataFile.c_str(), "r");
@@ -394,6 +396,8 @@ void Map::loadEnemies(ENEMY_TYPE type){
     case E_CITY:
       whiteEnemies = read;
       break;
+    default:
+      break;
   }
 }
 
@@ -435,6 +439,8 @@ ENEMY Map::getEnemy(ENEMY_TYPE type){
       whiteEnemies.erase(whiteEnemies.end() - 1);
       if(whiteEnemies.size() == 0)
         loadEnemies(E_CITY);
+      break;
+    default:
       break;
   }
   return result;
@@ -566,7 +572,7 @@ bool Map::revealTile(int tilePos){
 }
 
 int Map::getMoveCost(HEX h, bool isDay){
-  int result;
+  int result = 0;
 
   switch (h.terrain) {
     case NONET:
@@ -606,7 +612,7 @@ TILE Map::getTile(int p){
 
 void Map::initTileStack(){
   const int swaps = 500;
-  int p1, p2, p3, p4;
+  int p1, p2;
   TILE aux;
 
   tileStack.clear();

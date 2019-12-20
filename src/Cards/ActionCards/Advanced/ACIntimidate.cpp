@@ -20,6 +20,15 @@ void ACIntimidate::playCardWeak(STATE *s){
 	choices.push_back("Attack 3");
 	int choice = s->player->chooseOption(choices);
 
+  switch (choice) {
+    case 0:
+      givePlayerInfluence(s, 4);
+      break;
+    case 1:
+      givePlayerAttack(s, 3);
+      break;
+  }
+
   s->repToGain = s->repToGain - 1;
 }
 

@@ -13,7 +13,7 @@ void IFeelNoPain::onPlayed(STATE *s){
   if(s->gameScene == BATTLE_RANGED || s->gameScene == BATTLE_BLOCK || s->gameScene == BATTLE_ASSIGN || s->gameScene == BATTLE_ATTACK)
     return;
 
-  for(int i = 0; i < s->playerHand.size(); i++){
+  for(int i = 0; i < (int) s->playerHand.size(); i++){
     if(s->playerHand[i]->getCardType() == WOUND){
       s->playerDiscardDeck.addCardTop(s->playerHand[i]);
       s->playerHand[i] = s->playerDeedDeck.drawCard();
