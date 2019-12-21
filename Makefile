@@ -1,6 +1,7 @@
 all: bin/ MKIA
 
-MKIA: bin/Game.o bin/main.o bin/Map.o bin/Card.o bin/Deck.o bin/Wound.o bin/ACColdToughness.o bin/ACConcentration.o bin/ACCrystallize.o bin/ACDetermination.o bin/ACInstinct.o bin/ACManaDraw.o bin/ACMarch.o bin/ACPromise.o bin/ACRage.o bin/ACStamina.o bin/ACSwiftness.o bin/ACThreaten.o bin/ACTranquility.o bin/ACAgility.o bin/ACBloodRage.o bin/ACCrushingBolt.o bin/ACFireBolt.o bin/ACFrostBridge.o bin/ACIceBolt.o bin/ACIceShield.o bin/ACIntimidate.o bin/ACPathFinding.o bin/ACRefreshingWalk.o bin/ACSongOfWind.o bin/ACSwiftBolt.o bin/BotPlayer.o bin/HumanPlayer.o bin/Skill.o bin/ColdSwordsmanship.o bin/DoubleTime.o bin/IDontGiveADamn.o bin/IFeelNoPain.o bin/ManaOverload.o bin/NightSharpshooting.o bin/ResistanceBreak.o bin/ShieldMastery.o bin/TvkMotivation.o bin/WhoNeedsMagic.o bin/UserInterface.o bin/UbuntuUI.o bin/WindowsUI.o
+MKIA: bin/Game.o bin/main.o bin/Map.o bin/Card.o bin/Deck.o bin/Wound.o bin/ACColdToughness.o bin/ACConcentration.o bin/ACCrystallize.o bin/ACDetermination.o bin/ACInstinct.o bin/ACManaDraw.o bin/ACMarch.o bin/ACPromise.o bin/ACRage.o bin/ACStamina.o bin/ACSwiftness.o bin/ACThreaten.o bin/ACTranquility.o bin/ACAgility.o bin/ACBloodRage.o bin/ACCrushingBolt.o bin/ACFireBolt.o bin/ACFrostBridge.o bin/ACIceBolt.o bin/ACIceShield.o bin/ACIntimidate.o bin/ACPathFinding.o bin/ACRefreshingWalk.o bin/ACSongOfWind.o bin/ACSwiftBolt.o bin/BotPlayer.o bin/HumanPlayer.o bin/Skill.o bin/ColdSwordsmanship.o bin/DoubleTime.o bin/IDontGiveADamn.o bin/IFeelNoPain.o bin/ManaOverload.o bin/NightSharpshooting.o bin/ResistanceBreak.o bin/ShieldMastery.o bin/TvkMotivation.o bin/WhoNeedsMagic.o bin/UserInterface.o bin/UbuntuUI.o bin/WindowsUI.o bin/UAltemGuardians.o bin/UAltemMages.o bin/UAmotepFreezers.o bin/UAmotepGunners.o bin/UCatapults.o bin/UDelphanaMasters.o bin/UFireGolems.o bin/UFireMages.o bin/UForesters.o bin/UGuardianGolems.o bin/UHerbalists.o bin/UHeroesBlue.o bin/UHeroesGreen.o bin/UHeroesRed.o bin/UHeroesWhite.o bin/UIceGolems.o bin/UIceMages.o bin/UIllusionists.o bin/UMagicFamiliars.o bin/Unit.o bin/UNorthernMonks.o bin/USavageMonks.o bin/UPeasants.o bin/URedCapeMonks.o bin/UScouts.o bin/UShockTroops.o bin/USorcerers.o bin/UThugs.o bin/UUtemGuardsmen.o bin/UUtemCrossbowmen.o bin/UUtemSwordsmen.o
+	g++ -std=c++14 -O2 -o MKIA bin/*.o -Wall
 
 bin/Game.o: src/Game.cpp
 	g++ -std=c++14 -O2 -o bin/Game.o -c src/Game.cpp -Wall
@@ -142,6 +143,99 @@ bin/UbuntuUI.o: src/UserInterface/UbuntuUI.cpp
 
 bin/WindowsUI.o: src/UserInterface/WindowsUI.cpp
 	g++ -std=c++14 -O2 -o bin/WindowsUI.o -c src/UserInterface/WindowsUI.cpp -Wall
+
+bin/UAltemGuardians.o: src/Units/UAltemGuardians.cpp
+	g++ -std=c++14 -O2 -o bin/UAltemGuardians.o -c src/Units/UAltemGuardians.cpp -Wall
+
+bin/UAltemMages.o: src/Units/UAltemMages.cpp
+	g++ -std=c++14 -O2 -o bin/UAltemMages.o -c src/Units/UAltemMages.cpp -Wall
+
+bin/UAmotepFreezers.o: src/Units/UAmotepFreezers.cpp
+	g++ -std=c++14 -O2 -o bin/UAmotepFreezers.o -c src/Units/UAmotepFreezers.cpp -Wall
+
+bin/UAmotepGunners.o: src/Units/UAmotepGunners.cpp
+	g++ -std=c++14 -O2 -o bin/UAmotepGunners.o -c src/Units/UAmotepGunners.cpp -Wall
+
+bin/UCatapults.o: src/Units/UCatapults.cpp
+	g++ -std=c++14 -O2 -o bin/UCatapults.o -c src/Units/UCatapults.cpp -Wall
+
+bin/UDelphanaMasters.o: src/Units/UDelphanaMasters.cpp
+	g++ -std=c++14 -O2 -o bin/UDelphanaMasters.o -c src/Units/UDelphanaMasters.cpp -Wall
+
+bin/UFireGolems.o: src/Units/UFireGolems.cpp
+	g++ -std=c++14 -O2 -o bin/UFireGolems.o -c src/Units/UFireGolems.cpp -Wall
+
+bin/UFireMages.o: src/Units/UFireMages.cpp
+	g++ -std=c++14 -O2 -o bin/UFireMages.o -c src/Units/UFireMages.cpp -Wall
+
+bin/UForesters.o: src/Units/UForesters.cpp
+	g++ -std=c++14 -O2 -o bin/UForesters.o -c src/Units/UForesters.cpp -Wall
+
+bin/UGuardianGolems.o: src/Units/UGuardianGolems.cpp
+	g++ -std=c++14 -O2 -o bin/UGuardianGolems.o -c src/Units/UGuardianGolems.cpp -Wall
+
+bin/UHerbalists.o: src/Units/UHerbalists.cpp
+	g++ -std=c++14 -O2 -o bin/UHerbalists.o -c src/Units/UHerbalists.cpp -Wall
+
+bin/UHeroesBlue.o: src/Units/UHeroesBlue.cpp
+	g++ -std=c++14 -O2 -o bin/UHeroesBlue.o -c src/Units/UHeroesBlue.cpp -Wall
+
+bin/UHeroesGreen.o: src/Units/UHeroesGreen.cpp
+	g++ -std=c++14 -O2 -o bin/UHeroesGreen.o -c src/Units/UHeroesGreen.cpp -Wall
+
+bin/UHeroesRed.o: src/Units/UHeroesRed.cpp
+	g++ -std=c++14 -O2 -o bin/UHeroesRed.o -c src/Units/UHeroesRed.cpp -Wall
+
+bin/UHeroesWhite.o: src/Units/UHeroesWhite.cpp
+	g++ -std=c++14 -O2 -o bin/UHeroesWhite.o -c src/Units/UHeroesWhite.cpp -Wall
+
+bin/UIceGolems.o: src/Units/UIceGolems.cpp
+	g++ -std=c++14 -O2 -o bin/UIceGolems.o -c src/Units/UIceGolems.cpp -Wall
+
+bin/UIceMages.o: src/Units/UIceMages.cpp
+	g++ -std=c++14 -O2 -o bin/UIceMages.o -c src/Units/UIceMages.cpp -Wall
+
+bin/UIllusionists.o: src/Units/UIllusionists.cpp
+	g++ -std=c++14 -O2 -o bin/UIllusionists.o -c src/Units/UIllusionists.cpp -Wall
+
+bin/UMagicFamiliars.o: src/Units/UMagicFamiliars.cpp
+	g++ -std=c++14 -O2 -o bin/UMagicFamiliars.o -c src/Units/UMagicFamiliars.cpp -Wall
+
+bin/Unit.o: src/Units/Unit.cpp
+	g++ -std=c++14 -O2 -o bin/Unit.o -c src/Units/Unit.cpp -Wall
+
+bin/UNorthernMonks.o: src/Units/UNorthernMonks.cpp
+	g++ -std=c++14 -O2 -o bin/UNorthernMonks.o -c src/Units/UNorthernMonks.cpp -Wall
+
+bin/UPeasants.o: src/Units/UPeasants.cpp
+	g++ -std=c++14 -O2 -o bin/UPeasants.o -c src/Units/UPeasants.cpp -Wall
+
+bin/URedCapeMonks.o: src/Units/URedCapeMonks.cpp
+	g++ -std=c++14 -O2 -o bin/URedCapeMonks.o -c src/Units/URedCapeMonks.cpp -Wall
+
+bin/USavageMonks.o: src/Units/USavageMonks.cpp
+	g++ -std=c++14 -O2 -o bin/USavageMonks.o -c src/Units/USavageMonks.cpp -Wall
+
+bin/UScouts.o: src/Units/UScouts.cpp
+	g++ -std=c++14 -O2 -o bin/UScouts.o -c src/Units/UScouts.cpp -Wall
+
+bin/UShockTroops.o: src/Units/UShockTroops.cpp
+	g++ -std=c++14 -O2 -o bin/UShockTroops.o -c src/Units/UShockTroops.cpp -Wall
+
+bin/USorcerers.o: src/Units/USorcerers.cpp
+	g++ -std=c++14 -O2 -o bin/USorcerers.o -c src/Units/USorcerers.cpp -Wall
+
+bin/UThugs.o: src/Units/UThugs.cpp
+	g++ -std=c++14 -O2 -o bin/UThugs.o -c src/Units/UThugs.cpp -Wall
+
+bin/UUtemCrossbowmen.o: src/Units/UUtemCrossbowmen.cpp
+	g++ -std=c++14 -O2 -o bin/UUtemCrossbowmen.o -c src/Units/UUtemCrossbowmen.cpp -Wall
+
+bin/UUtemGuardsmen.o: src/Units/UUtemGuardsmen.cpp
+	g++ -std=c++14 -O2 -o bin/UUtemGuardsmen.o -c src/Units/UUtemGuardsmen.cpp -Wall
+
+bin/UUtemSwordsmen.o: src/Units/UUtemSwordsmen.cpp
+	g++ -std=c++14 -O2 -o bin/UUtemSwordsmen.o -c src/Units/UUtemSwordsmen.cpp -Wall
 
 bin/:
 	mkdir -p bin
